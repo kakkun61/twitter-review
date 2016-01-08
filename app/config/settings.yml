@@ -25,7 +25,7 @@ ip-from-header: "_env:IP_FROM_HEADER:false"
 
 database:
   user:     "twitter-review"
-  password: "_env:MYSQL_PASSWORD"
+  password: "_env:MYSQL_PASSWORD:twitter-review"
   host:     "localhost"
   port:     5432
   database: "twitter-review"
