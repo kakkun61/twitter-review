@@ -1,0 +1,3 @@
+<p>Hello
+<p>screen name: #{screenName}
+<p>status id: #{statusId}
