@@ -4,9 +4,12 @@ module Model where
 
 import ClassyPrelude.Yesod
 import Database.Persist.Quasi
+import Text.Blaze
+
+import Model.TweetStatus
 
 type ScreenName = String
-type TweetId = Int
+-- type TweetId = Int
 -- type User = String
 
 -- You can define all of your database entities in the entities file.
@@ -15,3 +18,6 @@ type TweetId = Int
 -- http://www.yesodweb.com/book/persistent/
 share [mkPersist sqlSettings, mkMigrate "migrateAll"]
     $(persistFileWith lowerCaseSettings "config/models")
+
+instance ToMarkup TweetId where
+    toMarkup = string . show

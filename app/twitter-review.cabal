@@ -18,6 +18,7 @@ library
                      Import
                      Import.NoFoundation
                      Model
+                     Model.TweetStatus
                      Settings
                      Settings.StaticFiles
                      Handler.Common
@@ -84,6 +85,8 @@ library
                  , time
                  , case-insensitive
                  , wai
+                 , network-uri
+                 , blaze-markup
 
 executable         twitter-review
     if flag(library-only)
