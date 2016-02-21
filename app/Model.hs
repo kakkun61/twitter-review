@@ -5,12 +5,13 @@ module Model where
 import ClassyPrelude.Yesod
 import Database.Persist.Quasi
 
+type ScreenName = String
+type TweetId = Int
+-- type User = String
+
 -- You can define all of your database entities in the entities file.
 -- You can find more information on persistent and how to declare entities
 -- at:
 -- http://www.yesodweb.com/book/persistent/
 share [mkPersist sqlSettings, mkMigrate "migrateAll"]
     $(persistFileWith lowerCaseSettings "config/models")
-
-type ScreenName = String
-type StatusId = Int

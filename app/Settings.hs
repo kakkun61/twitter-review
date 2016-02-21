@@ -87,7 +87,10 @@ instance FromJSON AppSettings where
         -- (If you enable it in your my.cnf file, you can delete this code).
         let appDatabaseConf = fromYamlAppDatabaseConf { myConnInfo = (myConnInfo fromYamlAppDatabaseConf) {
                 MySQL.connectOptions =
-                  ( MySQL.connectOptions (myConnInfo fromYamlAppDatabaseConf)) ++ [MySQL.InitCommand "SET SESSION sql_mode = 'STRICT_ALL_TABLES';\0"]
+                  ( MySQL.connectOptions (myConnInfo fromYamlAppDatabaseConf)) ++
+                    [ MySQL.InitCommand "SET SESSION sql_mode = 'STRICT_ALL_TABLES';\0"
+                    , MySQL.CharsetName "utf8mb4"
+                    ]
               }
             }
 
