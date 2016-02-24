@@ -11,12 +11,12 @@ Email
 Comment
     text Text
     user UserId
-    created UTCTime default=current_timestamp
+    created UTCTime
     deriving Show Ord Eq
 Tweet
     text Text
     user UserId
     status TweetStatus
-    created UTCTime default=current_timestamp
+    created UTCTime
 
  -- By default this file is used in Model.hs (which is imported by Foundation.hs)

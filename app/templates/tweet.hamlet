@@ -2,3 +2,8 @@
 <p>screen name: #{screenName}
 <p>status id: #{unSqlBackendKey $ unTweetKey statusId}
 <p>status id: #{fromSqlKey statusId}
+$if retry
+    <p>please retry
+<form method=post action=@{TweetR screenName statusId} enctype=#{enctype}>
+    ^{widget}
+    <button>Submit
