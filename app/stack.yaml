@@ -6,10 +6,10 @@ resolver: lts-5.4
 # Local packages, usually specified by relative directory name
 packages:
 - '.'
+- './lib/yesod-auth-oauth'
 
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)
-extra-deps:
-- yesod-auth-oauth-1.4.0.2
+extra-deps: []
 
 # Override default flag values for local packages and extra-deps
 flags:
