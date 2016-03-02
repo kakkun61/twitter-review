@@ -1,0 +1,5 @@
+<p>Hi
+$maybe aId <- mAId
+    <p>user id: #{fromSqlKey aId}
+$nothing
+    <a href=@{AuthR LoginR}>login

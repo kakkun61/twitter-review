@@ -4,13 +4,14 @@ import Import.NoFoundation
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Text.Hamlet          (hamletFile)
 import Text.Jasmine         (minifym)
-import Yesod.Auth.BrowserId (authBrowserId)
+import qualified Yesod.Auth.OAuth as OA
 import Yesod.Auth.Message   (AuthMessage (InvalidLogin))
 import Yesod.Default.Util   (addStaticContentExternal)
 import Yesod.Core.Types     (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
 import qualified Data.CaseInsensitive as CI
 import qualified Data.Text.Encoding as TE
+import Data.Maybe
 
 -- | The foundation datatype for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -131,25 +132,38 @@ instance YesodAuth App where
     type AuthId App = UserId
 
     -- Where to send a user after successful login
-    loginDest _ = undefined -- HomeR
+    loginDest _ = HomeR
     -- Where to send a user after logout
-    logoutDest _ = undefined -- HomeR
+    logoutDest _ = HomeR
     -- Override the above two destinations when a Referer: header is present
     redirectToReferer _ = True
 
     authenticate creds = runDB $ do
+        $(logDebug) $ "creds extra" ++ (pack $ show $ credsExtra creds)
+        let
+            userId = credsIdent creds
+            extra = credsExtra creds
+            screenName = fromJust $ lookup "screen_name" extra
+            token = fromJust $ lookup "oauth_token" extra
+            secret = fromJust $ lookup "oauth_token_secret" extra
         x <- getBy $ UniqueUser $ credsIdent creds
         case x of
-            Just (Entity uid _) -> return $ Authenticated uid
-            Nothing -> Authenticated <$> insert User
-                { userIdent = credsIdent creds
-                , userPassword = Nothing
-                }
+            Just (Entity uid (User _ _ token' secret')) -> do
+                unless (token == token' && secret == secret') $
+                    update uid [UserOauthToken =. token, UserOauthSecret =. secret]
+                return $ Authenticated uid
+            Nothing -> do
+                uid <- insert $ User userId screenName token secret
+                return $ Authenticated uid
 
     -- You can add other plugins like BrowserID, email or OAuth here
-    authPlugins _ = [authBrowserId def]
+    authPlugins m = [OA.authTwitter
+                         (encodeUtf8 $ appOauthKey $ appSettings m)
+                         (encodeUtf8 $ appOauthSecret $ appSettings m)]
 
     authHttpManager = getHttpManager
+
+    loginHandler = redirect OA.twitterUrl
 
 instance YesodAuthPersist App
 
