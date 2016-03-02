@@ -5,6 +5,7 @@ module Yesod.Auth.OAuth
     , oauthUrl
     , authTwitter
     , authTwitterUsingUserId
+    , authTwitterAuthenticate
     , twitterUrl
     , authTumblr
     , tumblrUrl
@@ -93,13 +94,14 @@ mkExtractCreds name idName (Credential dic) = do
 authTwitter' :: YesodAuth m
              => ByteString -- ^ Consumer Key
              -> ByteString -- ^ Consumer Secret
-             -> String
+             -> String     -- ^ OAuth Authorize URI
+             -> String     -- ^ ID Key Name
              -> AuthPlugin m
-authTwitter' key secret idName = authOAuth
+authTwitter' key secret authorizeUri idName = authOAuth
                 (newOAuth { oauthServerName      = "twitter"
                           , oauthRequestUri      = "https://api.twitter.com/oauth/request_token"
                           , oauthAccessTokenUri  = "https://api.twitter.com/oauth/access_token"
-                          , oauthAuthorizeUri    = "https://api.twitter.com/oauth/authorize"
+                          , oauthAuthorizeUri    = authorizeUri
                           , oauthSignatureMethod = HMACSHA1
                           , oauthConsumerKey     = key
                           , oauthConsumerSecret  = secret
@@ -112,7 +114,7 @@ authTwitter :: YesodAuth m
             => ByteString -- ^ Consumer Key
             -> ByteString -- ^ Consumer Secret
             -> AuthPlugin m
-authTwitter key secret = authTwitter' key secret "screen_name"
+authTwitter key secret = authTwitter' key secret "https://api.twitter.com/oauth/authorize" "screen_name"
 {-# DEPRECATED authTwitter "Use authTwitterUsingUserID instead" #-}
 
 -- | Twitter plugin which uses Twitter's /user_id/ as ID.
@@ -124,7 +126,20 @@ authTwitterUsingUserId :: YesodAuth m
                   => ByteString -- ^ Consumer Key
                   -> ByteString -- ^ Consumer Secret
                   -> AuthPlugin m
-authTwitterUsingUserId key secret = authTwitter' key secret "user_id"
+authTwitterUsingUserId key secret = authTwitter' key secret "https://api.twitter.com/oauth/authorize" "user_id"
+
+-- | Twitter plugin which uses “GET oauth/authenticate” when authorization.
+--
+-- This method differs from GET oauth / authorize in that if the user has already granted the application permission,
+-- the redirect will occur without the user having to re-approve the application.
+--
+-- see <https://dev.twitter.com/oauth/reference/get/oauth/authenticate>
+authTwitterAuthenticate :: YesodAuth m
+                        => ByteString -- ^ Consumer Key
+                        -> ByteString -- ^ Consumer Secret
+                        -> AuthPlugin m
+authTwitterAuthenticate key secret = authTwitter' key secret "https://api.twitter.com/oauth/authenticate" "user_id"
+
 
 twitterUrl :: AuthRoute
 twitterUrl = oauthUrl "twitter"

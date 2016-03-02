@@ -157,7 +157,7 @@ instance YesodAuth App where
                 return $ Authenticated uid
 
     -- You can add other plugins like BrowserID, email or OAuth here
-    authPlugins m = [OA.authTwitterUsingUserId
+    authPlugins m = [OA.authTwitterAuthenticate
                          (encodeUtf8 $ appOauthKey $ appSettings m)
                          (encodeUtf8 $ appOauthSecret $ appSettings m)]
 
