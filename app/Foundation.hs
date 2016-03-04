@@ -140,21 +140,24 @@ instance YesodAuth App where
 
     authenticate creds = runDB $ do
         $(logDebug) $ "creds extra" ++ (pack $ show $ credsExtra creds)
-        let
-            userId = credsIdent creds
-            extra = credsExtra creds
-            screenName = fromJust $ lookup "screen_name" extra
-            token = fromJust $ lookup "oauth_token" extra
-            secret = fromJust $ lookup "oauth_token_secret" extra
-        x <- getBy $ UniqueUser $ credsIdent creds
-        case x of
-            Just (Entity uid (User _ _ token' secret')) -> do
-                unless (token == token' && secret == secret') $
-                    update uid [UserOauthToken =. token, UserOauthSecret =. secret]
-                return $ Authenticated uid
+        let extra = credsExtra creds
+        case lookup "denied" extra of
+            Just token -> return $ ServerError $ "denied: " <> token
             Nothing -> do
-                uid <- insert $ User userId screenName token secret
-                return $ Authenticated uid
+                let
+                    userId = credsIdent creds
+                    screenName = fromJust $ lookup "screen_name" extra
+                    token = fromJust $ lookup "oauth_token" extra
+                    secret = fromJust $ lookup "oauth_token_secret" extra
+                x <- getBy $ UniqueUser $ credsIdent creds
+                case x of
+                    Just (Entity uid (User _ _ token' secret')) -> do
+                        unless (token == token' && secret == secret') $
+                            update uid [UserOauthToken =. token, UserOauthSecret =. secret]
+                        return $ Authenticated uid
+                    Nothing -> do
+                        uid <- insert $ User userId screenName token secret
+                        return $ Authenticated uid
 
     -- You can add other plugins like BrowserID, email or OAuth here
     authPlugins m = [OA.authTwitterAuthenticate
