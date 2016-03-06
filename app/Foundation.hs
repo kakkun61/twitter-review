@@ -4,7 +4,7 @@ import Import.NoFoundation
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Text.Hamlet          (hamletFile)
 import Text.Jasmine         (minifym)
-import qualified Yesod.Auth.OAuth as OA
+import qualified Yesod.Auth.GoogleEmail2 as GoogleEmail2
 import Yesod.Auth.Message   (AuthMessage (InvalidLogin))
 import Yesod.Default.Util   (addStaticContentExternal)
 import Yesod.Core.Types     (Logger)
@@ -160,13 +160,13 @@ instance YesodAuth App where
                         return $ Authenticated uid
 
     -- You can add other plugins like BrowserID, email or OAuth here
-    authPlugins m = [OA.authTwitterAuthenticate
-                         (encodeUtf8 $ appOauthKey $ appSettings m)
-                         (encodeUtf8 $ appOauthSecret $ appSettings m)]
+    authPlugins m = [GoogleEmail2.authGoogleEmailSaveToken
+                         (appOauthKey $ appSettings m)
+                         (appOauthSecret $ appSettings m)]
 
     authHttpManager = getHttpManager
 
-    loginHandler = redirect OA.twitterUrl
+    loginHandler = redirect GoogleEmail2.forwardUrl
 
 instance YesodAuthPersist App
 
