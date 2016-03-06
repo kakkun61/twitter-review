@@ -59,28 +59,29 @@ authOAuth oauth mkCreds = AuthPlugin name dispatch login
     dispatch "GET" [] = lift $ do
       Just tokSec <- lookupSession oauthSessionName
       deleteSession oauthSessionName
-      reqTok <- do
+      accTok <- do
         denied <- runInputGet $ iopt textField "denied"
         case denied of
-          Just oaTok -> return $ Credential [("denied", encodeUtf8 oaTok)]
-          Nothing ->
-            if oauthVersion oauth == OAuth10
-              then do
-                oaTok  <- runInputGet $ ireq textField "oauth_token"
-                return $ Credential [ ("oauth_token", encodeUtf8 oaTok)
-                                    , ("oauth_token_secret", encodeUtf8 tokSec)
-                                    ]
-              else do
-                (verifier, oaTok) <-
-                    runInputGet $ (,) <$> ireq textField "oauth_verifier"
-                                      <*> ireq textField "oauth_token"
-                return $ Credential [ ("oauth_verifier", encodeUtf8 verifier)
-                                    , ("oauth_token", encodeUtf8 oaTok)
-                                    , ("oauth_token_secret", encodeUtf8 tokSec)
-                                    ]
-      master <- getYesod
-      accTok <- getAccessToken oauth reqTok (authHttpManager master)
-      creds  <- liftIO $ mkCreds accTok
+          Just dTok -> return $ Credential [("denied", encodeUtf8 dTok)]
+          Nothing -> do
+            reqTok <- do
+              if oauthVersion oauth == OAuth10
+                then do
+                  oaTok  <- runInputGet $ ireq textField "oauth_token"
+                  return $ Credential [ ("oauth_token", encodeUtf8 oaTok)
+                                      , ("oauth_token_secret", encodeUtf8 tokSec)
+                                      ]
+                else do
+                  (verifier, oaTok) <-
+                      runInputGet $ (,) <$> ireq textField "oauth_verifier"
+                                        <*> ireq textField "oauth_token"
+                  return $ Credential [ ("oauth_verifier", encodeUtf8 verifier)
+                                      , ("oauth_token", encodeUtf8 oaTok)
+                                      , ("oauth_token_secret", encodeUtf8 tokSec)
+                                      ]
+            master <- getYesod
+            getAccessToken oauth reqTok (authHttpManager master)
+      creds <- liftIO $ mkCreds accTok
       setCredsRedirect creds
     dispatch _ _ = notFound
 
