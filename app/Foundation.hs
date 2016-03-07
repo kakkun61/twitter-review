@@ -139,25 +139,26 @@ instance YesodAuth App where
     redirectToReferer _ = True
 
     authenticate creds = runDB $ do
-        $(logDebug) $ "creds extra" ++ (pack $ show $ credsExtra creds)
-        let extra = credsExtra creds
-        case lookup "denied" extra of
-            Just token -> return $ ServerError $ "denied: " <> token
-            Nothing -> do
-                let
-                    userId = credsIdent creds
-                    screenName = fromJust $ lookup "screen_name" extra
-                    token = fromJust $ lookup "oauth_token" extra
-                    secret = fromJust $ lookup "oauth_token_secret" extra
-                x <- getBy $ UniqueUser $ credsIdent creds
-                case x of
-                    Just (Entity uid (User _ _ token' secret')) -> do
-                        unless (token == token' && secret == secret') $
-                            update uid [UserOauthToken =. token, UserOauthSecret =. secret]
+        $(logDebug) $ "creds id:" ++ (pack $ show $ credsIdent creds)
+        $(logDebug) $ "creds extra: " ++ (pack $ show $ credsExtra creds)
+        let ident = credsIdent creds
+        mToken <- lift GoogleEmail2.getUserAccessToken
+        case mToken of
+            Just token@(GoogleEmail2.Token accTok tokTyp) -> do
+                master <- lift getYesod
+                let manager = authHttpManager master
+                mDisplayName <- fmap (join . fmap GoogleEmail2.personDisplayName) $ lift (GoogleEmail2.getPerson manager token)
+                mUser <- getBy $ UniqueUser $ ident
+                case mUser of
+                    Just (Entity uid (User _ mDisplayName' accTok' tokTyp')) -> do
+                        when (mDisplayName /= mDisplayName' || accTok /= accTok' || tokTyp /= tokTyp') $
+                            update uid [UserDisplayName =. mDisplayName, UserAccessToken =. accTok, UserTokenType =. tokTyp]
                         return $ Authenticated uid
                     Nothing -> do
-                        uid <- insert $ User userId screenName token secret
+                        uid <- insert $ User ident mDisplayName accTok tokTyp
                         return $ Authenticated uid
+            Nothing ->
+                return $ ServerError "no token gotten"
 
     -- You can add other plugins like BrowserID, email or OAuth here
     authPlugins m = [GoogleEmail2.authGoogleEmailSaveToken

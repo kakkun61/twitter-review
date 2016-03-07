@@ -1,8 +1,8 @@
 User
     ident Text
-    screenName Text
-    oauthToken Text
-    oauthSecret Text
+    displayName Text Maybe
+    accessToken Text
+    tokenType Text
     UniqueUser ident
     deriving Typeable
 Email

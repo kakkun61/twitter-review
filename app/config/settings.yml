@@ -34,5 +34,5 @@ database:
 copyright: Insert copyright statement here
 #analytics: UA-YOURCODE
 
-oauthKey: "at5Qk4sAVkC7LSUhSUraKIDCF"
-oauthSecret: "8UXa1bqWm4nu7QwP35l8Z4n4l5Xg4t6EOxQbo68MDY9RIQKMF0"
+oauthKey: "_env:OAUTH_CLIENT:"
+oauthSecret: "_env:OAUTH_CLIENT_SECRET:"
