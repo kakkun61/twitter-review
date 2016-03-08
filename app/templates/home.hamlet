@@ -1,5 +1,10 @@
 <p>Hi
 $maybe aId <- mAId
     <p>user id: #{fromSqlKey aId}
+    <p>
+      <a href=@{AuthR LogoutR}>logout
+    <p>
+      <a href=@{NewAccountR}>add new Twitter account
 $nothing
-    <a href=@{AuthR LoginR}>login
+    <p>
+      <a href=@{AuthR LoginR}>login

@@ -24,6 +24,7 @@ library
                      Handler.Common
                      Handler.Tweet
                      Handler.Home
+                     Handler.NewAccount
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT

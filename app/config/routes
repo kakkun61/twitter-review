@@ -6,3 +6,5 @@
 
 / HomeR GET
 !/#ScreenName/tweet/#TweetId TweetR GET POST
+
+/accounts/new NewAccountR GET POST
