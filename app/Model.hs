@@ -5,9 +5,10 @@ module Model where
 import ClassyPrelude.Yesod
 import Database.Persist.Quasi
 import Text.Blaze
+import Yesod.Auth.GoogleEmail2 (Token)
 
 import Model.TweetStatus
-import Model.GoogleOAuthToken
+import Model.Token ()
 
 type ScreenName = String
 -- type TweetId = Int

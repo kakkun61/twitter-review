@@ -11,7 +11,6 @@ import Yesod.Core.Types     (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
 import qualified Data.CaseInsensitive as CI
 import qualified Data.Text.Encoding as TE
-import Data.Maybe
 
 -- | The foundation datatype for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -142,13 +141,12 @@ instance YesodAuth App where
         $(logDebug) $ "creds id:" ++ (pack $ show $ credsIdent creds)
         $(logDebug) $ "creds extra: " ++ (pack $ show $ credsExtra creds)
         let ident = credsIdent creds
-        mGeToken <- lift GoogleEmail2.getUserAccessToken
-        case mGeToken of
-            Just geToken -> do
-                let token = ge2TokenToToken geToken
+        mToken <- lift GoogleEmail2.getUserAccessToken
+        case mToken of
+            Just token -> do
                 master <- lift getYesod
                 let manager = authHttpManager master
-                mDisplayName <- fmap (join . fmap GoogleEmail2.personDisplayName) $ lift (GoogleEmail2.getPerson manager geToken)
+                mDisplayName <- fmap (join . fmap GoogleEmail2.personDisplayName) $ lift (GoogleEmail2.getPerson manager token)
                 mUser <- getBy $ UniqueUser $ ident
                 case mUser of
                     Just (Entity uid (User _ mDisplayName' token')) -> do

@@ -19,7 +19,7 @@ library
                      Import.NoFoundation
                      Model
                      Model.TweetStatus
-                     Model.GoogleOAuthToken
+                     Model.Token
                      Settings
                      Settings.StaticFiles
                      Handler.Common
