@@ -7,6 +7,7 @@ import Database.Persist.Quasi
 import Text.Blaze
 
 import Model.TweetStatus
+import Model.GoogleOAuthToken
 
 type ScreenName = String
 -- type TweetId = Int

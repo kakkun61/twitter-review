@@ -142,20 +142,21 @@ instance YesodAuth App where
         $(logDebug) $ "creds id:" ++ (pack $ show $ credsIdent creds)
         $(logDebug) $ "creds extra: " ++ (pack $ show $ credsExtra creds)
         let ident = credsIdent creds
-        mToken <- lift GoogleEmail2.getUserAccessToken
-        case mToken of
-            Just token@(GoogleEmail2.Token accTok tokTyp) -> do
+        mGeToken <- lift GoogleEmail2.getUserAccessToken
+        case mGeToken of
+            Just geToken -> do
+                let token = ge2TokenToToken geToken
                 master <- lift getYesod
                 let manager = authHttpManager master
-                mDisplayName <- fmap (join . fmap GoogleEmail2.personDisplayName) $ lift (GoogleEmail2.getPerson manager token)
+                mDisplayName <- fmap (join . fmap GoogleEmail2.personDisplayName) $ lift (GoogleEmail2.getPerson manager geToken)
                 mUser <- getBy $ UniqueUser $ ident
                 case mUser of
-                    Just (Entity uid (User _ mDisplayName' accTok' tokTyp')) -> do
-                        when (mDisplayName /= mDisplayName' || accTok /= accTok' || tokTyp /= tokTyp') $
-                            update uid [UserDisplayName =. mDisplayName, UserAccessToken =. accTok, UserTokenType =. tokTyp]
+                    Just (Entity uid (User _ mDisplayName' token')) -> do
+                        when (mDisplayName /= mDisplayName' || token /= token') $
+                            update uid [UserDisplayName =. mDisplayName, UserToken =. token]
                         return $ Authenticated uid
                     Nothing -> do
-                        uid <- insert $ User ident mDisplayName accTok tokTyp
+                        uid <- insert $ User ident mDisplayName token
                         return $ Authenticated uid
             Nothing ->
                 return $ ServerError "no token gotten"

@@ -1,8 +1,7 @@
 User
     ident Text
     displayName Text Maybe
-    accessToken Text
-    tokenType Text
+    token Token
     UniqueUser ident
     deriving Typeable
 Email
