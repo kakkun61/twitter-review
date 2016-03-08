@@ -1,14 +1,16 @@
 /static StaticR Static appStatic
 /auth   AuthR   Auth   getAuth
 
-/favicon.ico FaviconR GET
-/robots.txt RobotsR GET
+/favicon.ico                 FaviconR             GET
+/robots.txt                  RobotsR              GET
 
-/ HomeR GET
+/                            HomeR                GET
+
 !/#ScreenName/tweet/#TweetId TweetR GET POST
 
-/accounts/new NewAccountR GET
+/accounts/new                NewAccountR          GET
 
-/accounts/auth/forward  AccountAuthForwardR  GET
-/accounts/auth/callback AccountAuthCallbackR GET
-/account/#ScreenName/setting AccountSettingR GET POST
+/accounts/auth/forward       AccountAuthForwardR  GET
+/accounts/auth/callback      AccountAuthCallbackR GET
+
+/account/#ScreenName/setting AccountSettingR      GET POST
