@@ -34,5 +34,8 @@ database:
 copyright: Insert copyright statement here
 #analytics: UA-YOURCODE
 
-oauthKey: "_env:OAUTH_CLIENT:"
-oauthSecret: "_env:OAUTH_CLIENT_SECRET:"
+googleOAuthKey: "_env:GOOGLE_OAUTH_CLIENT:"
+googleOAuthSecret: "_env:GOOGLE_OAUTH_CLIENT_SECRET:"
+
+twitterOAuthKey: "_env:TWITTER_OAUTH_CLIENT:"
+twitterOAuthSecret: "_env:TWITTER_OAUTH_CLIENT_SECRET:"

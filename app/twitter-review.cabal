@@ -26,6 +26,8 @@ library
                      Handler.Tweet
                      Handler.Home
                      Handler.NewAccount
+                     Handler.AccountAuth
+                     Handler.AccountSetting
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
@@ -90,7 +92,8 @@ library
                  , wai
                  , network-uri
                  , blaze-markup
-                 , yesod-auth-oauth
+
+                 , authenticate-oauth
 
 executable         twitter-review
     if flag(library-only)

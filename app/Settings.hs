@@ -56,8 +56,11 @@ data AppSettings = AppSettings
     , appAnalytics              :: Maybe Text
     -- ^ Google Analytics code
 
-    , appOauthKey                  :: Text
-    , appOauthSecret               :: Text
+    , appGoogleOAuthKey         :: Text
+    , appGoogleOAuthSecret      :: Text
+
+    , appTwitterOAuthKey        :: Text
+    , appTwitterOAuthSecret     :: Text
     }
 
 instance FromJSON AppSettings where
@@ -97,8 +100,11 @@ instance FromJSON AppSettings where
               }
             }
 
-        appOauthKey <- o .: "oauthKey"
-        appOauthSecret <- o .: "oauthSecret"
+        appGoogleOAuthKey <- o .: "googleOAuthKey"
+        appGoogleOAuthSecret <- o .: "googleOAuthSecret"
+
+        appTwitterOAuthKey <- o .: "twitterOAuthKey"
+        appTwitterOAuthSecret <- o .: "twitterOAuthSecret"
 
         return AppSettings {..}
 

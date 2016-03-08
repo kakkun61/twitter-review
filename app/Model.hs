@@ -10,7 +10,7 @@ import Yesod.Auth.GoogleEmail2 (Token)
 import Model.TweetStatus
 import Model.Token ()
 
-type ScreenName = String
+type ScreenName = Text
 -- type TweetId = Int
 -- type User = String
 

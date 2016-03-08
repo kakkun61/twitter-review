@@ -4,6 +4,12 @@ User
     token Token
     UniqueUser ident
     deriving Typeable
+Account
+    ident       Int64
+    screenName  Text
+    token       Text
+    tokenSecret Text
+    UniqueAccount ident
 Email
     email Text
     userId UserId Maybe

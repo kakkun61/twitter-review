@@ -7,4 +7,8 @@
 / HomeR GET
 !/#ScreenName/tweet/#TweetId TweetR GET POST
 
-/accounts/new NewAccountR GET POST
+/accounts/new NewAccountR GET
+
+/accounts/auth/forward  AccountAuthForwardR  GET
+/accounts/auth/callback AccountAuthCallbackR GET
+/account/#ScreenName/setting AccountSettingR GET POST

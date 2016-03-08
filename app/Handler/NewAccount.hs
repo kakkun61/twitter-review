@@ -3,7 +3,8 @@ module Handler.NewAccount where
 import Import
 
 getNewAccountR :: Handler Html
-getNewAccountR = error "not yet implemented"
-
-postNewAccountR :: Handler Html
-postNewAccountR = error "not yet implemented"
+getNewAccountR = do
+    defaultLayout [whamlet|
+                      <p>
+                          <a href=@{AccountAuthForwardR}>Twitter log-in
+                  |]

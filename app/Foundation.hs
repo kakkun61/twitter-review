@@ -161,8 +161,8 @@ instance YesodAuth App where
 
     -- You can add other plugins like BrowserID, email or OAuth here
     authPlugins m = [GoogleEmail2.authGoogleEmailSaveToken
-                         (appOauthKey $ appSettings m)
-                         (appOauthSecret $ appSettings m)]
+                         (appGoogleOAuthKey $ appSettings m)
+                         (appGoogleOAuthSecret $ appSettings m)]
 
     authHttpManager = getHttpManager
 
