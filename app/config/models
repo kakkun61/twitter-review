@@ -1,7 +1,7 @@
 User
     ident Text
     displayName Text Maybe
-    token Token
+    token Text
     UniqueUser ident
     deriving Typeable
 Account

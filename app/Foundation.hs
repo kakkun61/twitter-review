@@ -143,21 +143,24 @@ instance YesodAuth App where
         let ident = credsIdent creds
         mToken <- lift GoogleEmail2.getUserAccessToken
         case mToken of
-            Just token -> do
+            Just token@(GoogleEmail2.Token accTok tokTyp) -> do
+                when (tokTyp /= bearer) $ error $ unpack $ "unexpected token type\n\texpected: " <> bearer <> "\n\tactual: " <> tokTyp
                 master <- lift getYesod
                 let manager = authHttpManager master
                 mDisplayName <- fmap (join . fmap GoogleEmail2.personDisplayName) $ lift (GoogleEmail2.getPerson manager token)
                 mUser <- getBy $ UniqueUser $ ident
                 case mUser of
                     Just (Entity uid (User _ mDisplayName' token')) -> do
-                        when (mDisplayName /= mDisplayName' || token /= token') $
-                            update uid [UserDisplayName =. mDisplayName, UserToken =. token]
+                        when (mDisplayName /= mDisplayName' || accTok /= token') $
+                            update uid [UserDisplayName =. mDisplayName, UserToken =. accTok]
                         return $ Authenticated uid
                     Nothing -> do
-                        uid <- insert $ User ident mDisplayName token
+                        uid <- insert $ User ident mDisplayName accTok
                         return $ Authenticated uid
             Nothing ->
                 return $ ServerError "no token gotten"
+        where
+            bearer = "Bearer"
 
     -- You can add other plugins like BrowserID, email or OAuth here
     authPlugins m = [GoogleEmail2.authGoogleEmailSaveToken
