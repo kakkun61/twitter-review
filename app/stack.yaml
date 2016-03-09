@@ -6,7 +6,6 @@ resolver: lts-5.4
 # Local packages, usually specified by relative directory name
 packages:
 - '.'
-- './lib/yesod-auth-oauth'
 
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)
 extra-deps: []
