@@ -4,7 +4,6 @@ import Import
 
 getNewAccountR :: Handler Html
 getNewAccountR = do
-    defaultLayout [whamlet|
-                      <p>
-                          <a href=@{AccountAuthForwardR}>Twitter log-in
-                  |]
+    mUser <- fmap (fmap entityVal) maybeAuth
+    let header = $(widgetFile "header")
+    defaultLayout $(widgetFile "new-account")

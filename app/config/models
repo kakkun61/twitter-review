@@ -3,13 +3,14 @@ User
     displayName Text Maybe
     token Text
     UniqueUser ident
-    deriving Typeable
+    deriving Show Eq Typeable
 Account
     ident       Int64
     screenName  Text
     token       Text
     tokenSecret Text
     UniqueAccount ident
+    deriving Show Eq
 Email
     email Text
     userId UserId Maybe

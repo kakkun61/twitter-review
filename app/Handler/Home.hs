@@ -5,5 +5,6 @@ import Database.Persist.Sql
 
 getHomeR :: Handler Html
 getHomeR = do
-    mAId <- maybeAuthId
+    mUser <- fmap (fmap entityVal) maybeAuth
+    let header = $(widgetFile "header")
     defaultLayout $(widgetFile "home")
