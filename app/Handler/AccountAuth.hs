@@ -81,8 +81,8 @@ getAccountAuthCallbackR = do
                     Nothing -> do
                         _ <- insert $ Account userId screenName tok tokSec
                         return ()
+            clearUltDest
             redirect $ AccountSettingR screenName
-
 
 bsToText :: ByteString -> Text
 bsToText = decodeUtf8With lenientDecode

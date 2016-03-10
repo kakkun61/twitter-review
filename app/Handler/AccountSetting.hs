@@ -4,9 +4,9 @@ import Import
 
 getAccountSettingR :: ScreenName -> Handler Html
 getAccountSettingR screenName = do
-    defaultLayout [whamlet|
-                      <p>@#{screenName} Setting
-                  |]
+    mUser <- fmap (fmap entityVal) maybeAuth
+    let header = $(widgetFile "header")
+    defaultLayout $(widgetFile "account-setting")
 
 postAccountSettingR :: ScreenName -> Handler Html
 postAccountSettingR screenName = error "Not yet implemented: postAccountSettingR"
