@@ -6,4 +6,4 @@ $maybe _ <- mUser
     <a href=@{NewAccountR}>add new Twitter account
 $nothing
   <p>
-    <a href=@{MasterLoginR}>login
+    ^{signinWithGoogle}

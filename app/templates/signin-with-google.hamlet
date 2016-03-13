@@ -1,0 +1,2 @@
+<a href=@{AuthR LoginR}>
+  <span class="signin-with-google" alt="Sign in with Google" />
