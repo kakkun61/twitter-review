@@ -5,6 +5,7 @@
 /robots.txt                  RobotsR              GET
 
 /                            HomeR                GET
+/login                       MasterLoginR         GET
 
 !/#ScreenName/tweet/#TweetId TweetR GET POST
 

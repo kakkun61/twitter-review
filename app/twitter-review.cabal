@@ -27,6 +27,7 @@ library
                      Handler.NewAccount
                      Handler.AccountAuth
                      Handler.AccountSetting
+                     Handler.MasterLogin
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT

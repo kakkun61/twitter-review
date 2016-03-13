@@ -81,14 +81,22 @@ instance Yesod App where
         withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 
     -- The page to be redirected to when authentication is required.
-    authRoute _ = Just $ AuthR LoginR
+    authRoute _ = Just $ MasterLoginR
 
     -- Routes not requiring authentication.
-    isAuthorized (AuthR _) _ = return Authorized
-    isAuthorized FaviconR _ = return Authorized
-    isAuthorized RobotsR _ = return Authorized
-    -- Default to Authorized for now.
-    isAuthorized _ _ = return Authorized
+    isAuthorized (AuthR _)    _ = return Authorized
+    isAuthorized FaviconR     _ = return Authorized
+    isAuthorized RobotsR      _ = return Authorized
+    isAuthorized HomeR        _ = return Authorized
+    isAuthorized MasterLoginR _ = return Authorized
+    isAuthorized r            _ = do
+        $(logDebug) $ "isAuthorized: " <> (pack $ show r)
+        mUserId <- maybeAuthId
+        case mUserId of
+            Just userId -> do
+                -- check
+                return Authorized
+            Nothing -> return AuthenticationRequired
 
     -- This function creates static content files in the static folder
     -- and names them based on a hash of their content. This allows

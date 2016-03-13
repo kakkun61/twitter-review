@@ -1,0 +1,6 @@
+span.signin-with-twitter {
+    display: inline-block;
+    width: 158px;
+    height: 28px;
+    background-image: url(@{StaticR images_sign_in_with_twitter_gray_png});
+}
