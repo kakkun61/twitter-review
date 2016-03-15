@@ -19,6 +19,7 @@ library
                      Import.NoFoundation
                      Model
                      Model.TweetStatus
+                     Model.Permission
                      Settings
                      Settings.StaticFiles
                      Handler.Common

@@ -11,11 +11,12 @@ Account
     tokenSecret Text
     UniqueAccount ident
     deriving Show Eq
-Email
-    email Text
-    userId UserId Maybe
-    verkey Text Maybe
-    UniqueEmail email
+UserAccountRelation
+    userId      UserId
+    accountId   AccountId
+    permission  Permission
+    UniqueUserAccountRelation userId accountId
+    deriving Show Eq
 Comment
     text Text
     user UserId

@@ -5,6 +5,7 @@ module Import.NoFoundation
 import ClassyPrelude.Yesod   as Import
 import Model                 as Import
 import Model.TweetStatus     as Import
+import Model.Permission      as Import
 import Settings              as Import
 import Settings.StaticFiles  as Import
 import Yesod.Auth            as Import

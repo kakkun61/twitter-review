@@ -40,6 +40,7 @@ getAccountAuthForwardR = do
 getAccountAuthCallbackR :: Handler Html
 getAccountAuthCallbackR = do
     master <- getYesod
+    uid <- requireAuthId
     let oauth = mkOAuth master
     Just tokSec <- lookupSession oauthSessionName
     deleteSession oauthSessionName
@@ -47,7 +48,7 @@ getAccountAuthCallbackR = do
     case denied of
         Just _ -> do
             setMessage "log-in failed"
-            redirectUltDest $ HomeR
+            redirectUltDest HomeR
         Nothing -> do
             reqTok <-
                 if oauthVersion oauth == OAuth10
@@ -69,20 +70,25 @@ getAccountAuthCallbackR = do
                 tok        = fromJust $ lookup oauthTokenName dic
                 userId     = read $ unpack $ fromJust $ lookup "user_id" dic
                 screenName = fromJust $ lookup "screen_name" dic
-            runDB $ do
-                mAccount <- getBy $ UniqueAccount userId
-                case mAccount of
-                    Just (Entity uid (Account _ screenName' tok' tokSec')) -> do
-                        when (screenName /= screenName' || tok /= tok' || tokSec /= tokSec') $
-                            update uid [ AccountScreenName  =. screenName
-                                       , AccountToken       =. tok
-                                       , AccountTokenSecret =. tokSec
-                                       ]
-                    Nothing -> do
-                        _ <- insert $ Account userId screenName tok tokSec
-                        return ()
+            runDB $ store uid userId screenName tok tokSec
             clearUltDest
             redirect $ AccountSettingR screenName
+    where
+        store :: YesodPersist site => UserId -> Int64 -> Text -> Text -> Text -> ReaderT SqlBackend (HandlerT site IO) ()
+        store uid userId screenName token tokenSecret = do
+            mAccount <- getBy $ UniqueAccount userId
+            case mAccount of
+                Just (Entity aid (Account _ screenName' tok' tokSec'))
+                    | screenName /= screenName' || token /= tok' || tokenSecret /= tokSec' ->
+                        update aid [ AccountScreenName  =. screenName
+                                   , AccountToken       =. token
+                                   , AccountTokenSecret =. tokenSecret
+                                   ]
+                    | otherwise -> return ()
+                Nothing -> do
+                    accId <- insert $ Account userId screenName token tokenSecret
+                    _ <- insert $ UserAccountRelation uid accId Admin
+                    return ()
 
 bsToText :: ByteString -> Text
 bsToText = decodeUtf8With lenientDecode
