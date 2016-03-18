@@ -36,6 +36,7 @@ import Handler.Common
 import Handler.Tweet
 import Handler.Home
 import Handler.NewAccount
+import Handler.Account
 import Handler.AccountAuth
 import Handler.AccountSetting
 import Handler.MasterLogin

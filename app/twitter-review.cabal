@@ -26,6 +26,7 @@ library
                      Handler.Tweet
                      Handler.Home
                      Handler.NewAccount
+                     Handler.Account
                      Handler.AccountAuth
                      Handler.AccountSetting
                      Handler.MasterLogin
