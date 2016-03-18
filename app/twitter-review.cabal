@@ -22,6 +22,7 @@ library
                      Model.Permission
                      Settings
                      Settings.StaticFiles
+                     Template
                      Handler.Common
                      Handler.Tweet
                      Handler.Home

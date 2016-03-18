@@ -4,9 +4,9 @@ import Import
 
 getAccountSettingR :: ScreenName -> Handler Html
 getAccountSettingR screenName = do
-    mUser <- fmap (fmap entityVal) maybeAuth
+    user <- entityVal <$> requireAuth
     defaultLayout $ do
-        $(widgetFile "header")
+        headerWidget $ Just user
         $(widgetFile "account-setting")
 
 postAccountSettingR :: ScreenName -> Handler Html

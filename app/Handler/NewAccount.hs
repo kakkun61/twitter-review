@@ -4,7 +4,7 @@ import Import
 
 getNewAccountR :: Handler Html
 getNewAccountR = do
-    mUser <- fmap (fmap entityVal) maybeAuth
+    user <- entityVal <$> requireAuth
     defaultLayout $ do
-        $(widgetFile "header")
+        headerWidget $ Just user
         $(widgetFile "new-account")

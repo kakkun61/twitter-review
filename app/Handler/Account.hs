@@ -6,6 +6,5 @@ getAccountR :: ScreenName -> Handler Html
 getAccountR screenName = do
     user <- entityVal <$> requireAuth
     defaultLayout $ do
-        let mUser = Just user
-        $(widgetFile "header")
+        headerWidget $ Just user
         $(widgetFile "account")
