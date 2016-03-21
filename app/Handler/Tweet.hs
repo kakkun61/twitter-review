@@ -11,12 +11,13 @@ getTweetR screenName statusId = do
 
 postTweetR :: ScreenName -> TweetId -> Handler Html
 postTweetR screenName statusId = do
+    user <- requireAuth
     now <- lift getCurrentTime
     ((result, widget), enctype) <- runFormPost tweetForm
     case result of
         FormSuccess tweetFormData -> do
             let text = tweetFormText tweetFormData
-            _ <- runDB $ insert $ Tweet text (toSqlKey 1) Open now
+            _ <- runDB $ insert $ Tweet text (toSqlKey 1) (toSqlKey 1) Open now
             defaultLayout [whamlet|
                               <p>screen name: #{screenName}
                               <p>status id: #{fromSqlKey statusId}
