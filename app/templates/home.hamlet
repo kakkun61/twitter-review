@@ -1,9 +1,13 @@
-<p>Hi
 $maybe _ <- mUser
   <p>
     <a href=@{AuthR LogoutR}>logout
   <p>
     <a href=@{NewAccountR}>add new Twitter account
+  <div>
+    $forall acc <- accounts
+      $with screenName <- accountScreenName acc
+        <p>
+          <a href=@{AccountR screenName}>#{screenName}</a>
 $nothing
   <p>
     ^{signinWithGoogle}
