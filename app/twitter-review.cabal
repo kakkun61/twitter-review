@@ -97,6 +97,7 @@ library
                  , blaze-markup
 
                  , authenticate-oauth
+                 , esqueleto
 
 executable         twitter-review
     if flag(library-only)

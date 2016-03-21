@@ -1,6 +1,7 @@
 module Handler.Home where
 
 import Import
+import qualified Database.Esqueleto as E
 
 getHomeR :: Handler Html
 getHomeR = do
@@ -8,17 +9,14 @@ getHomeR = do
     case mUser of
         Just user ->
             runDB $ do
-                reps <- selectList [UserAccountRelationUserId ==. entityKey user] []
-                $(logDebug) $ pack $ show reps
-                accounts <- filterJust <$> mapM (get . userAccountRelationAccountId . entityVal) reps
+                accounts <- ((entityVal <$>) <$>) $ E.select $ E.from $ \(acc `E.InnerJoin` rel) -> do
+                    E.on $ acc E.^. AccountId E.==. rel E.^. UserAccountRelationAccountId
+                    E.where_ $ rel E.^. UserAccountRelationUserId E.==. E.val (entityKey user)
+                    return acc
                 lift $ defaultLayout $ do
                     let signinWithGoogle = $(widgetFile "signin-with-google")
                     headerWidget $ Just $ entityVal user
                     $(widgetFile "home")
-                where
-                    filterJust (Just a : r)  = a : filterJust r
-                    filterJust (Nothing : r) = filterJust r
-                    filterJust []            = []
         Nothing ->
             defaultLayout $ do
                 let signinWithGoogle = $(widgetFile "signin-with-google")
