@@ -5,8 +5,8 @@ import Import
 getMasterLoginR :: Handler Html
 getMasterLoginR = do
     $(logDebug) "getMasterLoginR"
-    user <- entityVal <$> requireAuth
+    mUser <- (entityVal <$>) <$> maybeAuth
     defaultLayout $ do
         let signinWithGoogle = $(widgetFile "signin-with-google")
-        headerWidget $ Just user
+        headerWidget mUser
         $(widgetFile "master-login")
