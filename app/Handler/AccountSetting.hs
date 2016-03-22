@@ -2,12 +2,14 @@ module Handler.AccountSetting where
 
 import Import
 
-getAccountSettingR :: ScreenName -> Handler Html
-getAccountSettingR screenName = do
+getAccountSettingR :: AccountIdParam -> Handler Html
+getAccountSettingR accountIdParam = do
     user <- entityVal <$> requireAuth
-    defaultLayout $ do
-        headerWidget $ Just user
-        $(widgetFile "account-setting")
+    runDB $ do
+        account <- entityVal <$> getBy404 (UniqueAccount accountIdParam)
+        lift $ defaultLayout $ do
+            headerWidget $ Just user
+            $(widgetFile "account-setting")
 
-postAccountSettingR :: ScreenName -> Handler Html
+postAccountSettingR :: AccountIdParam -> Handler Html
 postAccountSettingR screenName = error "Not yet implemented: postAccountSettingR"

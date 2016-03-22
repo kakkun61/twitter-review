@@ -2,9 +2,11 @@ module Handler.Account where
 
 import Import
 
-getAccountR :: ScreenName -> Handler Html
-getAccountR screenName = do
+getAccountR :: AccountIdParam -> Handler Html
+getAccountR accountIdParam = do
     user <- entityVal <$> requireAuth
-    defaultLayout $ do
-        headerWidget $ Just user
-        $(widgetFile "account")
+    runDB $ do
+        account <- entityVal <$> getBy404 (UniqueAccount accountIdParam)
+        lift $ defaultLayout $ do
+            headerWidget $ Just user
+            $(widgetFile "account")

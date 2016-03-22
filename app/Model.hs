@@ -9,7 +9,7 @@ import Text.Blaze
 import Model.TweetStatus
 import Model.Permission
 
-type ScreenName = Text
+type AccountIdParam = Int64
 -- type TweetId = Int
 -- type User = String
 

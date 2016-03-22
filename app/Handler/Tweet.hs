@@ -3,13 +3,13 @@ module Handler.Tweet where
 import Import
 import Database.Persist.Sql
 
-getTweetR :: ScreenName -> TweetId -> Handler Html
+getTweetR :: AccountIdParam -> TweetId -> Handler Html
 getTweetR screenName statusId = do
     (widget, enctype) <- generateFormPost tweetForm
     let retry = False
     defaultLayout $(widgetFile "tweet")
 
-postTweetR :: ScreenName -> TweetId -> Handler Html
+postTweetR :: AccountIdParam -> TweetId -> Handler Html
 postTweetR screenName statusId = do
     user <- requireAuth
     now <- lift getCurrentTime

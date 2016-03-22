@@ -4,10 +4,10 @@ $maybe _ <- mUser
   <p>
     <a href=@{NewAccountR}>add new Twitter account
   <div>
-    $forall acc <- accounts
-      $with screenName <- accountScreenName acc
+    $forall account <- accounts
+      $with screenName <- accountScreenName account, accountId <- accountIdent account
         <p>
-          <a href=@{AccountR screenName}>#{screenName}</a>
+          <a href=@{AccountR accountId}>#{screenName}</a>
 $nothing
   <p>
     ^{signinWithGoogle}

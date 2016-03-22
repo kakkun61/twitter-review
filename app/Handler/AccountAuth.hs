@@ -72,7 +72,7 @@ getAccountAuthCallbackR = do
                 screenName = fromJust $ lookup "screen_name" dic
             runDB $ store uid userId screenName tok tokSec
             clearUltDest
-            redirect $ AccountSettingR screenName
+            redirect $ AccountSettingR userId
     where
         store :: YesodPersist site => UserId -> Int64 -> Text -> Text -> Text -> ReaderT SqlBackend (HandlerT site IO) ()
         store uid userId screenName token tokenSecret = do
