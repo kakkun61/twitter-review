@@ -1,4 +1,7 @@
-module Handler.Tweet where
+module Handler.Tweet
+ ( getTweetR
+ , postTweetR
+ ) where
 
 import Import
 import Database.Persist.Sql
