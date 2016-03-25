@@ -10,8 +10,7 @@ import Model.TweetStatus
 import Model.Permission
 
 type AccountIdParam = Int64
--- type TweetId = Int
--- type User = String
+type TweetIdParam = Int64
 
 -- You can define all of your database entities in the entities file.
 -- You can find more information on persistent and how to declare entities

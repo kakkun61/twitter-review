@@ -3,14 +3,14 @@ module Handler.Tweet where
 import Import
 import Database.Persist.Sql
 
-getTweetR :: AccountIdParam -> TweetId -> Handler Html
-getTweetR screenName statusId = do
+getTweetR :: AccountIdParam -> TweetIdParam -> Handler Html
+getTweetR accountIdParam tweetIdParam = do
     (widget, enctype) <- generateFormPost tweetForm
     let retry = False
     defaultLayout $(widgetFile "tweet")
 
-postTweetR :: AccountIdParam -> TweetId -> Handler Html
-postTweetR screenName statusId = do
+postTweetR :: AccountIdParam -> TweetIdParam -> Handler Html
+postTweetR accountIdParam tweetIdParam = do
     user <- requireAuth
     now <- lift getCurrentTime
     ((result, widget), enctype) <- runFormPost tweetForm
@@ -19,8 +19,8 @@ postTweetR screenName statusId = do
             let text = tweetFormText tweetFormData
             _ <- runDB $ insert $ Tweet text (toSqlKey 1) (toSqlKey 1) Open now
             defaultLayout [whamlet|
-                              <p>screen name: #{screenName}
-                              <p>status id: #{fromSqlKey statusId}
+                              <p>account Id param: #{accountIdParam}
+                              <p>status id: #{tweetIdParam}
                               <p>tweet text: #{text}
                           |]
         _ -> do

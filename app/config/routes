@@ -14,4 +14,4 @@
 
 /account/#AccountIdParam                AccountR             GET
 /account/#AccountIdParam/setting        AccountSettingR      GET POST
-/account/#AccountIdParam/tweet/#TweetId TweetR               GET POST
+/account/#AccountIdParam/tweet/#TweetIdParam TweetR               GET POST
