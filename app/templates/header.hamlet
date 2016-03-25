@@ -2,3 +2,5 @@
   <p><a href=@{HomeR}>Home</a>
 $maybe user <- mUser
   <p>user : #{fromMaybe "" $ userDisplayName user} (#{userIdent user})
+  <p>
+    <a href=@{AuthR LogoutR}>logout

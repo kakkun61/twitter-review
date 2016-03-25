@@ -1,6 +1,7 @@
 module Template where
 
 import Data.Maybe
+import Yesod.Auth
 
 import Foundation
 import Settings
