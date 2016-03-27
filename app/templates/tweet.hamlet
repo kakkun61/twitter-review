@@ -1,6 +1,10 @@
-<p>Hello
-$if retry
-    <p>please retry
-<form method=post action=@{TweetR accountIdParam tweetIdParam} enctype=#{enctype}>
-    ^{widget}
-    <button>Submit
+<h1>@#{accountScreenName account}
+<h2>Tweet List
+<div>
+  <dl>
+    <dt>text
+    <dd>#{tweetText tweet}
+    <dt>status
+    <dd>#{tweetStatus tweet}
+    <dt>time
+    <dd>#{tweetCreated tweet}

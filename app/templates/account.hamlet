@@ -1,2 +1,4 @@
 <h1>
   Tweet List
+<p>
+  <a href=@{NewTweetR accountIdParam}>Create new tweet
