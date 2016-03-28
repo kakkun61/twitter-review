@@ -23,3 +23,10 @@ postNewTweetR accountIdParam = do
                 account <- getBy404 $ UniqueAccount accountIdParam
                 tweetId <- insert $ Tweet text (entityKey account) (entityKey user) Open now
                 lift $ redirect $ TweetR accountIdParam (fromSqlKey tweetId)
+        FormFailure err -> defaultLayout $ do
+            $(logDebug) $ unlines err
+            headerWidget $ Just $ entityVal user
+            $(widgetFile "new-tweet")
+        FormMissing -> defaultLayout $ do
+            headerWidget $ Just $ entityVal user
+            $(widgetFile "new-tweet")

@@ -7,4 +7,4 @@
     <dt>status
     <dd>#{tweetStatus tweet}
     <dt>time
-    <dd>#{tweetCreated tweet}
+    <dd>#{formatRFC1123 $ tweetCreated tweet}
