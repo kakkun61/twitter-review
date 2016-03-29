@@ -8,9 +8,12 @@ import Database.Persist.Sql
 
 getTweetR :: AccountIdParam -> TweetIdParam -> Handler Html
 getTweetR accountIdParam tweetIdParam = runDB $ do
+    user <- lift requireAuth
     account <- entityVal <$> getBy404 (UniqueAccount accountIdParam)
     tweet <- get404 $ toSqlKey tweetIdParam
-    lift $ defaultLayout $(widgetFile "tweet")
+    lift $ defaultLayout $ do
+        headerWidget $ Just $ entityVal user
+        $(widgetFile "tweet")
 
 postTweetR :: AccountIdParam -> TweetIdParam -> Handler Html
 postTweetR accountIdParam tweetIdParam = error "not yet implemented"
