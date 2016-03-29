@@ -1,7 +1,6 @@
 module Handler.NewTweet where
 
 import Import
-import Database.Persist.Sql
 
 getNewTweetR :: AccountIdParam -> Handler Html
 getNewTweetR accountIdParam = do

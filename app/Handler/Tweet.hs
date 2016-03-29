@@ -4,7 +4,6 @@ module Handler.Tweet
  ) where
 
 import Import
-import Database.Persist.Sql
 
 getTweetR :: AccountIdParam -> TweetIdParam -> Handler Html
 getTweetR accountIdParam tweetIdParam = runDB $ do

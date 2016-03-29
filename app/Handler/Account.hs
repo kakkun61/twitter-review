@@ -1,7 +1,6 @@
 module Handler.Account where
 
 import Import
-import Database.Persist.Sql
 
 getAccountR :: AccountIdParam -> Handler Html
 getAccountR accountIdParam = do

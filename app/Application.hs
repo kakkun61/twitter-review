@@ -15,7 +15,7 @@ module Application
 
 import Control.Monad.Logger                 (liftLoc, runLoggingT)
 import Database.Persist.MySQL               (createMySQLPool, myConnInfo,
-                                             myPoolSize, runSqlPool)
+                                             myPoolSize)
 import Import
 import Language.Haskell.TH.Syntax           (qLocation)
 import Network.Wai (Middleware)
