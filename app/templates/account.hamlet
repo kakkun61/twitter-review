@@ -1,4 +1,16 @@
 <h1>
-  Tweet List
+  Tweet List of @#{accountScreenName account}
 <p>
   <a href=@{NewTweetR accountIdParam}>Create new tweet
+<div>
+  $forall tweetEntity <- tweetEntities
+    $with tweet <- entityVal tweetEntity, tweetKey <- entityKey tweetEntity
+      <div>
+        <dl>
+          <dt>text
+          <dd>#{tweetText tweet}
+          <dt>status
+          <dd>#{tweetStatus tweet}
+          <dt>time
+          <dd>#{formatRFC1123 $ tweetCreated tweet}
+        <a href=@{TweetR accountIdParam (fromSqlKey tweetKey)}>link

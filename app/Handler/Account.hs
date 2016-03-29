@@ -1,12 +1,15 @@
 module Handler.Account where
 
 import Import
+import Database.Persist.Sql
 
 getAccountR :: AccountIdParam -> Handler Html
 getAccountR accountIdParam = do
     user <- entityVal <$> requireAuth
     runDB $ do
-        account <- entityVal <$> getBy404 (UniqueAccount accountIdParam)
+        accountEntity <- getBy404 (UniqueAccount accountIdParam)
+        let account = entityVal accountEntity
+        tweetEntities <- selectList [TweetAccountId ==. entityKey accountEntity] [Desc TweetCreated]
         lift $ defaultLayout $ do
             headerWidget $ Just user
             $(widgetFile "account")
