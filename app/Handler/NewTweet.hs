@@ -19,11 +19,10 @@ postNewTweetR accountIdParam = do
     case result of
         FormSuccess tweetFormData -> do
             let text = tweetFormText tweetFormData
-            runDB $ do
+            tweetId <- runDB $ do
                 account <- getBy404 $ UniqueAccount accountIdParam
-                tweetId <- insert $ Tweet text (entityKey account) (entityKey user) Open now
-                lift $ defaultLayout [whamlet| hi |]
---                 lift $ redirect $ TweetR accountIdParam (fromSqlKey tweetId)
+                insert $ Tweet text (entityKey account) (entityKey user) Open now
+            redirect $ TweetR accountIdParam (fromSqlKey tweetId)
         FormFailure err -> defaultLayout $ do
             $(logDebug) $ unlines err
             headerWidget $ Just $ entityVal user
