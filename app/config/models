@@ -23,10 +23,13 @@ Comment
     created UTCTime
     deriving Show Ord Eq
 Tweet
-    text        Text
     accountId   AccountId
     userId      UserId
     status      TweetStatus
     created     UTCTime
-
+TweetCandidate
+    tweetId     TweetId
+    text        Text
+    userId      UserId
+    created     UTCTime
  -- By default this file is used in Model.hs (which is imported by Foundation.hs)
