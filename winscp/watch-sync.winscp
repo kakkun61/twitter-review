@@ -1,0 +1,6 @@
+option batch on
+option exclude ".git/;.idea/"
+open twitter-review
+synchronize remote -delete "C:\Users\kazuki\Programming\twitter-review" "/home/kazuki/twitter-review"
+keepuptodate -delete "C:\Users\kazuki\Programming\twitter-review" "/home/kazuki/twitter-review"
+exit
