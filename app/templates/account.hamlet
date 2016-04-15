@@ -7,8 +7,8 @@
     $with tweet <- entityVal tweetEntity, tweetKey <- entityKey tweetEntity
       <div>
         <dl>
-          <dt>text
-          <dd>#{tweetText tweet}
+$#          <dt>uer id
+$#          <dd>#{tweetCandidateUserId tweet}
           <dt>status
           <dd>#{tweetStatus tweet}
           <dt>time

@@ -27,9 +27,11 @@ Tweet
     userId      UserId
     status      TweetStatus
     created     UTCTime
+    deriving Show Eq
 TweetCandidate
     tweetId     TweetId
     text        Text
     userId      UserId
     created     UTCTime
+    deriving Show Eq
  -- By default this file is used in Model.hs (which is imported by Foundation.hs)

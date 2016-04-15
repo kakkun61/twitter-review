@@ -2,8 +2,8 @@
 <h2>Tweet List
 <div>
   <dl>
-    <dt>text
-    <dd>#{tweetText tweet}
+    <dt>user id
+    <dd>#{fromMaybe "" $ userDisplayName tweetUser}
     <dt>status
     <dd>#{tweetStatus tweet}
     <dt>time

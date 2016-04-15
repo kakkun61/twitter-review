@@ -10,6 +10,7 @@ getTweetR accountIdParam tweetIdParam = runDB $ do
     user <- lift requireAuth
     account <- entityVal <$> getBy404 (UniqueAccount accountIdParam)
     tweet <- get404 $ toSqlKey tweetIdParam
+    tweetUser <- get404 $ tweetUserId tweet
     lift $ defaultLayout $ do
         headerWidget $ Just $ entityVal user
         $(widgetFile "tweet")
