@@ -3,12 +3,12 @@
 <p>
   <a href=@{NewTweetR accountIdParam}>Create new tweet
 <div>
-  $forall tweetEntity <- tweetEntities
-    $with tweet <- entityVal tweetEntity, tweetKey <- entityKey tweetEntity
+  $forall (tw, twc, usr) <- rows
+    $with tweet <- entityVal tw, tweetKey <- entityKey tw, tweetCandidate <- entityVal twc, user <- entityVal usr
       <div>
         <dl>
-$#          <dt>uer id
-$#          <dd>#{tweetCandidateUserId tweet}
+          <dt>uer id
+          <dd>#{fromMaybe "" $ userDisplayName user}
           <dt>status
           <dd>#{tweetStatus tweet}
           <dt>time
