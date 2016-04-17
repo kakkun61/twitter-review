@@ -1,16 +1,22 @@
 <h1>
   Tweet List of @#{accountScreenName account}
-<p>
-  <a href=@{NewTweetR accountIdParam}>Create new tweet
+<div #new-tweet>
+  <a .btn .btn-primary role=button href=@{NewTweetR accountIdParam}>Create new tweet
+<div #tweet-status .btn-group role=group>
+  <a .btn .btn-default .btn-sm role=button href="?state=open,tweeted,closed">
+    Any
+  <a .btn .btn-default .btn-sm role=button href="?state=open">
+    Open
+  <a .btn .btn-default .btn-sm role=button href="?state=tweeted">
+    Tweeted
+  <a .btn .btn-default .btn-sm role=button href="?state=closed">
+    Closed
 <div>
-  $forall (tw, twc, usr) <- rows
-    $with tweet <- entityVal tw, tweetKey <- entityKey tw, tweetCandidate <- entityVal twc, user <- entityVal usr
-      <div>
-        <dl>
-          <dt>uer id
-          <dd>#{fromMaybe "" $ userDisplayName user}
-          <dt>status
-          <dd>#{tweetStatus tweet}
-          <dt>time
-          <dd>#{formatRFC1123 $ tweetCreated tweet}
-        <a href=@{TweetR accountIdParam (fromSqlKey tweetKey)}>link
+  $forall (tw, twc) <- rows
+    $with tweet <- entityVal tw, tweetKey <- entityKey tw, tweetCandidate <- entityVal twc
+      <div .tweet>
+        <p>#{tweetCandidateText tweetCandidate}
+        <div .meta>
+          #{tweetStatus tweet}
+          <a href=@{TweetR accountIdParam (fromSqlKey tweetKey)}>
+            #{formatRFC1123 $ tweetCreated tweet}

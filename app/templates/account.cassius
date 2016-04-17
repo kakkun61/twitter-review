@@ -1,0 +1,15 @@
+div.tweet
+    border-top: 1px solid #000
+    border-bottom: 1px solid #000
+    margin-bottom: 2px
+    padding: 3px
+div.tweet p
+    margin: 0
+div.tweet div.meta
+    text-align: right
+div#new-tweet
+    margin-top: 3px
+    margin-bottom: 3px
+div#tweet-status
+    margin-top: 3px
+    margin-bottom: 3px
