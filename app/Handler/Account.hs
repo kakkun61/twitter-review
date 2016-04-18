@@ -6,7 +6,7 @@ import qualified Database.Esqueleto as E
 getAccountR :: AccountIdParam -> Handler Html
 getAccountR accountIdParam = do
     user <- entityVal <$> requireAuth
-    runDB $ do
+    (account, rows) <- runDB $ do
         accountEntity <- getBy404 (UniqueAccount accountIdParam)
         let account = entityVal accountEntity
         rows <- E.select $ E.from $ \(tw `E.InnerJoin` twc `E.InnerJoin` acc) -> do
@@ -21,7 +21,7 @@ getAccountR accountIdParam = do
                                            E.&&. twca E.^. TweetCandidateCreated E.>. twc E.^. TweetCandidateCreated
                                   )
             return (tw, twc)
-        $(logDebug) $ "rows: " ++ pack (show rows)
-        lift $ defaultLayout $ do
-            headerWidget $ Just user
-            $(widgetFile "account")
+        return (account, rows)
+    defaultLayout $ do
+        headerWidget $ Just user
+        $(widgetFile "account")
