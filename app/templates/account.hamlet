@@ -3,14 +3,24 @@
 <div #new-tweet>
   <a .btn .btn-primary role=button href=@{NewTweetR accountIdParam}>Create new tweet
 <div #tweet-status .btn-group role=group>
-  <a .btn .btn-default .btn-sm role=button href="?state=open,tweeted,closed">
-    Any
-  <a .btn .btn-default .btn-sm role=button href="?state=open">
-    Open
-  <a .btn .btn-default .btn-sm role=button href="?state=tweeted">
-    Tweeted
-  <a .btn .btn-default .btn-sm role=button href="?state=closed">
-    Closed
+  $if S.member POpen statusParams
+    <a .btn .btn-default .btn-sm .active role=button href=@?{(AccountR accountIdParam, [("status", toParam $ S.delete POpen statusParams)])}>
+      Open
+  $else
+    <a .btn .btn-default .btn-sm         role=button href=@?{(AccountR accountIdParam, [("status", toParam $ S.insert POpen statusParams)])}>
+      Open
+  $if S.member PTweeted statusParams
+    <a .btn .btn-default .btn-sm .active role=button href=@?{(AccountR accountIdParam, [("status", toParam $ S.delete PTweeted statusParams)])}>
+      Tweeted
+  $else
+    <a .btn .btn-default .btn-sm         role=button href=@?{(AccountR accountIdParam, [("status", toParam $ S.insert PTweeted statusParams)])}>
+      Tweeted
+  $if S.member PClosed statusParams
+    <a .btn .btn-default .btn-sm .active role=button href=@?{(AccountR accountIdParam, [("status", toParam $ S.delete PClosed statusParams)])}>
+      Closed
+  $else
+    <a .btn .btn-default .btn-sm         role=button href=@?{(AccountR accountIdParam, [("status", toParam $ S.insert PClosed statusParams)])}>
+      Closed
 <div>
   $forall (tw, twc) <- rows
     $with tweet <- entityVal tw, tweetKey <- entityKey tw, tweetCandidate <- entityVal twc

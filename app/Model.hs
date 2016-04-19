@@ -21,3 +21,7 @@ share [mkPersist sqlSettings, mkMigrate "migrateAll"]
 
 instance ToMarkup TweetId where
     toMarkup = string . show
+
+class Param a where
+    toParam :: a -> Text
+    fromParam :: Text -> Maybe a
