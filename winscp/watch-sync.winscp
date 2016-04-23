@@ -1,5 +1,5 @@
 option batch on
-option exclude ".git/;.idea/"
+option exclude ".git/;.gitignore;.idea/;*.iml;.stack-work/;dist/;yesod-devel/;client_session_key.aes;tmp/"
 open twitter-review
 synchronize remote -delete "C:\Users\kazuki\Programming\twitter-review" "/home/kazuki/twitter-review"
 keepuptodate -delete "C:\Users\kazuki\Programming\twitter-review" "/home/kazuki/twitter-review"
