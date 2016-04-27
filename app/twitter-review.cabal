@@ -23,6 +23,7 @@ library
                      Settings
                      Settings.StaticFiles
                      Template
+                     DataSource
                      Handler.Common
                      Handler.Tweet
                      Handler.Home
@@ -100,6 +101,11 @@ library
                  , authenticate-oauth
                  , esqueleto
                  , blaze-html
+                 , relational-query
+                 , relational-query-HDBC
+                 , yesod-relational-record
+                 , persistable-record
+                 , HDBC-mysql
 
 executable         twitter-review
     if flag(library-only)
