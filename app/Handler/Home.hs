@@ -2,10 +2,14 @@ module Handler.Home where
 
 import Import
 import qualified Database.Esqueleto as E
+import Model.Table.User
+import qualified Database.Relational.Query as RR
+import qualified Yesod.Relational as YR
 
 getHomeR :: Handler Html
 getHomeR = do
     mUser <- maybeAuth
+    r <- YR.runRelational $ YR.runQuery (RR.relationalQuery $ RR.query user) ()
     case mUser of
         Just user ->
             runDB $ do

@@ -2,3 +2,6 @@
 
 module Model.Table.User where
 
+import DataSource (defineTable)
+
+$(defineTable "user")
