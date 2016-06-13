@@ -9,7 +9,9 @@ import qualified Yesod.Relational as YR
 getHomeR :: Handler Html
 getHomeR = do
     mUser <- maybeAuth
-    r <- YR.runRelational $ YR.runQuery (RR.relationalQuery $ RR.query user) ()
+    $(logDebug) $ pack $ show user
+    r <- YR.runRelational $ YR.runQuery (RR.relationalQuery $ RR.relation $ RR.query user) ()
+    $(logDebug) $ pack $ show r
     case mUser of
         Just user ->
             runDB $ do

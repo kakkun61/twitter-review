@@ -10,19 +10,33 @@ packages:
 - location:
     git: git@github.com:bos/hdbc-mysql.git
     commit: d43ea057019ff683f278f36af410f4d3cbc731bc
+- location:
+    git: git@github.com:kakkun61/haskell-relational-record.git
+    commit: 177c1ad1d409d9a55d9a34747f85e42c1b97d853
+  subdirs:
+  - HDBC-session/
+  - names-th/
+  - persistable-record/
+  - persistable-types-HDBC-pg/
+  - relational-query/
+  - relational-query-HDBC/
+  - relational-record/
+  - relational-schemas/
+  - sql-words/
+  - text-postgresql/
 
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)
 extra-deps:
-- HDBC-session-0.1.0.0
-- names-th-0.2.0.1
-- persistable-record-0.4.0.0
-- persistable-types-HDBC-pg-0.0.1.3
-- relational-query-0.8.1.0
-- relational-query-HDBC-0.6.0.0
-- relational-record-0.1.3.0
-- relational-schemas-0.1.2.2
-- sql-words-0.1.3.1
-- text-postgresql-0.0.2.0
+#- HDBC-session-0.1.0.0
+#- names-th-0.2.0.1
+#- persistable-record-0.4.0.0
+#- persistable-types-HDBC-pg-0.0.1.3
+#- relational-query-0.8.1.0
+#- relational-query-HDBC-0.6.0.0
+#- relational-record-0.1.3.0
+#- relational-schemas-0.1.2.2
+#- sql-words-0.1.3.1
+#- text-postgresql-0.0.2.0
 
 # Override default flag values for local packages and extra-deps
 flags:
