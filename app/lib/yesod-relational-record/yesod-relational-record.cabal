@@ -15,6 +15,7 @@ Flag dev
 library
     hs-source-dirs:     src
     exposed-modules:    Yesod.Relational
+                      , Yesod.Auth.Relational
 
     if flag(dev)
         cpp-options:    -DDEVELOPMENT
