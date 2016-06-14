@@ -12,7 +12,7 @@ packages:
     commit: d43ea057019ff683f278f36af410f4d3cbc731bc
 - location:
     git: git@github.com:kakkun61/haskell-relational-record.git
-    commit: 177c1ad1d409d9a55d9a34747f85e42c1b97d853
+    commit: 5174a5217e5f1b83d2db153e69e6554af721b9ae
   subdirs:
   - HDBC-session/
   - names-th/
