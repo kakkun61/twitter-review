@@ -1,4 +1,6 @@
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Yesod.Auth.Relational where
 
@@ -36,9 +38,8 @@ cachedAuth
 newtype CachedMaybeAuth val = CachedMaybeAuth { unCachedMaybeAuth :: Maybe val }
     deriving Typeable
 
-maybeAuth :: ( YesodAuthRelational master
-             , Typeable val
-             ) => HandlerT master IO (Maybe (AuthModel master))
+maybeAuth :: (YesodAuthRelational master, Typeable (AuthModel master))
+          => HandlerT master IO (Maybe (AuthModel master))
 maybeAuth = runMaybeT $ do
     (aid, ae) <- MaybeT maybeAuthPair
     return ae
@@ -50,9 +51,8 @@ maybeAuthPair = runMaybeT $ do
     ae  <- MaybeT $ cachedAuth aid
     return (aid, ae)
 
-requireAuth :: ( YesodAuthRelational master
-               , Typeable val
-               ) => HandlerT master IO (AuthModel master)
+requireAuth :: (YesodAuthRelational master, Typeable (AuthModel master))
+            => HandlerT master IO (AuthModel master)
 requireAuth = maybeAuth >>= maybe handleAuthLack return
 
 requireAuthPair :: (YesodAuthRelational master, Typeable (AuthModel master))
