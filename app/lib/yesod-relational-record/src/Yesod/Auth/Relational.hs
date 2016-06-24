@@ -2,7 +2,14 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Yesod.Auth.Relational where
+module Yesod.Auth.Relational
+    ( YesodAuthRelational (..)
+    , defaultMaybeAuthId
+    , maybeAuth
+    , maybeAuthPair
+    , requireAuth
+    , requireAuthPair
+    ) where
 
 import Control.Monad
 import Control.Monad.Trans.Maybe
