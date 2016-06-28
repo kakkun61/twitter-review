@@ -1,19 +1,22 @@
 module Foundation where
 
 import Import.NoFoundation
-import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Text.Hamlet          (hamletFile)
 import Text.Jasmine         (minifym)
 import qualified Yesod.Auth.GoogleEmail2 as GoogleEmail2
 import Yesod.Auth.Message   (AuthMessage (InvalidLogin))
 import Yesod.Default.Util   (addStaticContentExternal)
 import Yesod.Core.Types     (Logger)
-import Yesod.Relational     (YesodRelational, YesodRelationalConnection, runRelational)
-import qualified Yesod.Auth.Relational as YR
+import Yesod.Relational     (YesodRelational (..), YesodRelationalConnection, runQuery)
+import Yesod.Auth.Relational (YesodAuthRelational (..), defaultMaybeAuthId)
 import qualified Yesod.Core.Unsafe as Unsafe
 import qualified Data.CaseInsensitive as CI
 import qualified Data.Text.Encoding as TE
 import Database.HDBC.MySQL  (Connection)
+import Database.Relational.Query (Relation, relationalQuery, relation, query, wheres, value, (!), (.=.))
+import Data.Pool            (Pool, withResource)
+import Model.Table.User     (User)
+import qualified Model.Table.User as User
 
 -- | The foundation datatype for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -22,7 +25,7 @@ import Database.HDBC.MySQL  (Connection)
 data App = App
     { appSettings    :: AppSettings
     , appStatic      :: Static -- ^ Settings for static file serving.
-    , appConnPool    :: ConnectionPool -- ^ Database connection pool.
+    , appConnPool    :: Pool Connection -- ^ Database connection pool.
     , appHttpManager :: Manager
     , appLogger      :: Logger
     }
@@ -92,14 +95,15 @@ instance Yesod App where
     isAuthorized RobotsR      _ = return Authorized
     isAuthorized HomeR        _ = return Authorized
     isAuthorized MasterLoginR _ = return Authorized
-    isAuthorized r            _ = do
-        $(logDebug) $ "isAuthorized: " <> (pack $ show r)
-        mUserId <- maybeAuthId
-        case mUserId of
-            Just userId -> do
-                -- check
-                return Authorized
-            Nothing -> return AuthenticationRequired
+--     isAuthorized r            _ = do
+--         $(logDebug) $ "isAuthorized: " <> (pack $ show r)
+--         mUserId <- maybeAuthId
+--         case mUserId of
+--             Just userId -> do
+--                 -- check
+--                 return Authorized
+--             Nothing -> return AuthenticationRequired
+    isAuthorized _ _ = return Authorized
 
     -- This function creates static content files in the static folder
     -- and names them based on a hash of their content. This allows
@@ -130,16 +134,15 @@ instance Yesod App where
     makeLogger = return . appLogger
 
 -- How to run database actions.
-instance YesodPersist App where
-    type YesodPersistBackend App = SqlBackend
-    runDB action = do
+instance YesodRelational App where
+    type YesodRelationalConnection App = Connection
+    -- runRelational :: YesodRelationalMonad site a -> HandlerT site IO a
+    runRelational action = do
         master <- getYesod
-        runSqlPool action $ appConnPool master
-instance YesodPersistRunner App where
-    getDBRunner = defaultGetDBRunner appConnPool
+        withResource (appConnPool master) $ runReaderT action
 
 instance YesodAuth App where
-    type AuthId App = UserId
+    type AuthId App = Int64
 
     -- Where to send a user after successful login
     loginDest _ = HomeR
@@ -148,30 +151,31 @@ instance YesodAuth App where
     -- Override the above two destinations when a Referer: header is present
     redirectToReferer _ = True
 
-    authenticate creds = runDB $ do
-        $(logDebug) $ "creds id:" ++ (pack $ show $ credsIdent creds)
-        $(logDebug) $ "creds extra: " ++ (pack $ show $ credsExtra creds)
-        let ident = credsIdent creds
-        mToken <- lift GoogleEmail2.getUserAccessToken
-        case mToken of
-            Just token@(GoogleEmail2.Token accTok tokTyp) -> do
-                when (tokTyp /= bearer) $ error $ unpack $ "unexpected token type\n\texpected: " <> bearer <> "\n\tactual: " <> tokTyp
-                master <- lift getYesod
-                let manager = authHttpManager master
-                mDisplayName <- fmap (join . fmap GoogleEmail2.personDisplayName) $ lift (GoogleEmail2.getPerson manager token)
-                mUser <- getBy $ UniqueUser $ ident
-                case mUser of
-                    Just (Entity uid (User _ mDisplayName' token')) -> do
-                        when (mDisplayName /= mDisplayName' || accTok /= token') $
-                            update uid [UserDisplayName =. mDisplayName, UserToken =. accTok]
-                        return $ Authenticated uid
-                    Nothing -> do
-                        uid <- insert $ User ident mDisplayName accTok
-                        return $ Authenticated uid
-            Nothing ->
-                return $ ServerError "no token gotten"
-        where
-            bearer = "Bearer"
+    authenticate _ = error "don't call me temporally"
+--     authenticate creds = runDB $ do
+--         $(logDebug) $ "creds id:" ++ (pack $ show $ credsIdent creds)
+--         $(logDebug) $ "creds extra: " ++ (pack $ show $ credsExtra creds)
+--         let ident = credsIdent creds
+--         mToken <- lift GoogleEmail2.getUserAccessToken
+--         case mToken of
+--             Just token@(GoogleEmail2.Token accTok tokTyp) -> do
+--                 when (tokTyp /= bearer) $ error $ unpack $ "unexpected token type\n\texpected: " <> bearer <> "\n\tactual: " <> tokTyp
+--                 master <- lift getYesod
+--                 let manager = authHttpManager master
+--                 mDisplayName <- fmap (join . fmap GoogleEmail2.personDisplayName) $ lift (GoogleEmail2.getPerson manager token)
+--                 mUser <- getBy $ UniqueUser $ ident
+--                 case mUser of
+--                     Just (Entity uid (User _ mDisplayName' token')) -> do
+--                         when (mDisplayName /= mDisplayName' || accTok /= token') $
+--                             update uid [UserDisplayName =. mDisplayName, UserToken =. accTok]
+--                         return $ Authenticated uid
+--                     Nothing -> do
+--                         uid <- insert $ User ident mDisplayName accTok
+--                         return $ Authenticated uid
+--             Nothing ->
+--                 return $ ServerError "no token gotten"
+--         where
+--             bearer = "Bearer"
 
     -- You can add other plugins like BrowserID, email or OAuth here
     authPlugins m = [GoogleEmail2.authGoogleEmailSaveToken
@@ -182,7 +186,22 @@ instance YesodAuth App where
 
     loginHandler = redirect GoogleEmail2.forwardUrl
 
-instance YesodAuthPersist App
+    maybeAuthId = defaultMaybeAuthId
+
+instance YesodAuthRelational App where
+    type AuthModel App = User
+
+    getAuthModel ident = do
+        us <- runRelational $ runQuery (relationalQuery go) ()
+        case us of
+            [] -> return Nothing
+            u : _ -> return $ Just u
+        where
+            go :: Relation () (User.User)
+            go = relation $ do
+                u <- query User.user
+                wheres $ u ! User.id' .=. value ident
+                return u
 
 -- This instance is required to use forms. You can modify renderMessage to
 -- achieve customized and internationalized form validation messages.
@@ -205,9 +224,3 @@ unsafeHandler = Unsafe.fakeHandlerGetLogger appLogger
 -- https://github.com/yesodweb/yesod/wiki/Sending-email
 -- https://github.com/yesodweb/yesod/wiki/Serve-static-files-from-a-separate-domain
 -- https://github.com/yesodweb/yesod/wiki/i18n-messages-in-the-scaffolding
-
-instance YesodRelational App where
-    type YesodRelationalConnection App = Database.HDBC.MySQL.Connection
-    runRelational relationalMonad = do
-        conn <- liftIO connectDB
-        runReaderT relationalMonad conn

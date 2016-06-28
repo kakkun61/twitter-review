@@ -3,7 +3,7 @@ module Handler.AccountSetting where
 import Import
 
 getAccountSettingR :: AccountIdParam -> Handler Html
-getAccountSettingR = undefined
+getAccountSettingR = error "don't call me temporally"
 -- getAccountSettingR accountIdParam = do
 --     user <- entityVal <$> requireAuth
 --     runDB $ do
@@ -13,4 +13,4 @@ getAccountSettingR = undefined
 --             $(widgetFile "account-setting")
 
 postAccountSettingR :: AccountIdParam -> Handler Html
-postAccountSettingR screenName = error "Not yet implemented: postAccountSettingR"
+postAccountSettingR _screenName = error "Not yet implemented: postAccountSettingR"

@@ -3,7 +3,7 @@ module Handler.NewTweet where
 import Import
 
 getNewTweetR :: AccountIdParam -> Handler Html
-getNewTweetR = undefined
+getNewTweetR = error "don't call me temporally"
 -- getNewTweetR accountIdParam = do
 --     user <- requireAuth
 --     (widget, enctype) <- generateFormPost tweetForm
@@ -12,7 +12,7 @@ getNewTweetR = undefined
 --         $(widgetFile "new-tweet")
 
 postNewTweetR :: AccountIdParam -> Handler Html
-postNewTweetR = undefined
+postNewTweetR = error "don't call me temporally"
 -- postNewTweetR accountIdParam = do
 --     user <- requireAuth
 --     now <- lift getCurrentTime

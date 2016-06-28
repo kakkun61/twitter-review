@@ -10,7 +10,6 @@ module Application
     , shutdownApp
     -- * for GHCI
     , handler
-    , db
     ) where
 
 import Control.Monad.Logger                 (liftLoc, runLoggingT)
@@ -29,6 +28,8 @@ import Network.Wai.Middleware.RequestLogger (Destination (Logger),
                                              mkRequestLogger, outputFormat)
 import System.Log.FastLogger                (defaultBufSize, newStdoutLoggerSet,
                                              toLogStr)
+import Database.HDBC                        (disconnect)
+import Data.Pool                            (createPool)
 
 -- Import all relevant handler modules here.
 -- Don't forget to add new modules to your cabal file!
@@ -74,12 +75,10 @@ makeFoundation appSettings = do
         logFunc = messageLoggerSource tempFoundation appLogger
 
     -- Create the database connection pool
-    pool <- flip runLoggingT logFunc $ createMySQLPool
-        (myConnInfo $ appDatabaseConf appSettings)
-        (myPoolSize $ appDatabaseConf appSettings)
+    pool <- createPool connectDB disconnect 1 20 10
 
     -- Perform database migration using our application's logging settings.
-    runLoggingT (runSqlPool (runMigration migrateAll) pool) logFunc
+--     runLoggingT (runSqlPool (runMigration migrateAll) pool) logFunc
 
     -- Return the foundation
     return $ mkFoundation pool
@@ -181,7 +180,3 @@ shutdownApp _ = return ()
 -- | Run a handler
 handler :: Handler a -> IO a
 handler h = getAppSettings >>= makeFoundation >>= flip unsafeHandler h
-
--- | Run DB queries
-db :: ReaderT SqlBackend (HandlerT App IO) a -> IO a
-db = handler . runDB

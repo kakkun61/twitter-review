@@ -11,7 +11,6 @@ import Database.Relational.Schema.MySQLInfo.Config (config)
 import Language.Haskell.TH (Q, Dec)
 import System.IO (IO)
 import Data.String (String)
-import Data.Bool (Bool(False))
 import Text.Show (Show)
 
 connectDB :: IO Connection

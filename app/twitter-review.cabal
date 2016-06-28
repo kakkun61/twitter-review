@@ -107,7 +107,9 @@ library
                  , relational-schemas
                  , yesod-relational-record
                  , persistable-record
+                 , HDBC
                  , HDBC-mysql
+                 , resource-pool
 
 executable         twitter-review
     if flag(library-only)

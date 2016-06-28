@@ -3,7 +3,7 @@ module Handler.MasterLogin where
 import Import
 
 getMasterLoginR :: Handler Html
-getMasterLoginR = undefined
+getMasterLoginR = error "don't call me temporally"
 -- getMasterLoginR = do
 --     $(logDebug) "getMasterLoginR"
 --     mUser <- (entityVal <$>) <$> maybeAuth

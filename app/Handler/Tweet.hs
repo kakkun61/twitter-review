@@ -6,7 +6,7 @@ module Handler.Tweet
 import Import
 
 getTweetR :: AccountIdParam -> TweetIdParam -> Handler Html
-getTweetR = undefined
+getTweetR = error "don't call me temporally"
 -- getTweetR accountIdParam tweetIdParam = runDB $ do
 --     user <- lift requireAuth
 --     account <- entityVal <$> getBy404 (UniqueAccount accountIdParam)
@@ -17,4 +17,4 @@ getTweetR = undefined
 --         $(widgetFile "tweet")
 
 postTweetR :: AccountIdParam -> TweetIdParam -> Handler Html
-postTweetR accountIdParam tweetIdParam = error "not yet implemented"
+postTweetR _accountIdParam _tweetIdParam = error "not yet implemented"

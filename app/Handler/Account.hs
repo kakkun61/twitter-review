@@ -1,11 +1,11 @@
 module Handler.Account (getAccountR) where
 
 import Import
-import qualified Database.Esqueleto as E
-import qualified Data.Set as S
+-- import qualified Database.Esqueleto as E
+-- import qualified Data.Set as S
 
 getAccountR :: AccountIdParam -> Handler Html
-getAccountR = undefined
+getAccountR = error "don't call me temporally"
 -- getAccountR accountIdParam = do
 --     user <- entityVal <$> requireAuth
 --     mStatusParamText <- lookupGetParam "status"
