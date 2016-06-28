@@ -5,9 +5,12 @@ import qualified Database.Esqueleto as E
 import Model.Table.User
 import qualified Database.Relational.Query as RR
 import qualified Yesod.Relational as YR
+import qualified Yesod.Auth.Relational as YR
 
 getHomeR :: Handler Html
 getHomeR = do
+--     u <- YR.maybeAuth
+--     $(logDebug) $ pack $ show u
     mUser <- maybeAuth
     $(logDebug) $ pack $ show user
     r <- YR.runRelational $ YR.runQuery (RR.relationalQuery $ RR.relation $ RR.query user) ()
