@@ -3,21 +3,19 @@
 
 CREATE TABLE `user` (
   `id`           bigint(20) NOT NULL AUTO_INCREMENT,
-  `ident`        text       NOT NULL,
+  `email`        text       NOT NULL,
   `display_name` text,
   `token`        text       NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `unique_user` (`ident`(200))
+  UNIQUE KEY `unique_user` (`email`(200))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 CREATE TABLE `account` (
-  `id`           bigint(20) NOT NULL AUTO_INCREMENT,
-  `ident`        bigint(20) NOT NULL,
+  `id`           bigint(20) NOT NULL,
   `screen_name`  text       NOT NULL,
   `token`        text       NOT NULL,
   `token_secret` text       NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `unique_account` (`ident`)
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 CREATE TABLE `user_account_relation` (
