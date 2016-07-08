@@ -2,7 +2,7 @@ module Import.NoFoundation
     ( module Import
     ) where
 
-import ClassyPrelude.Yesod   as Import
+import ClassyPrelude.Yesod   as Import hiding (Update)
 import Model                 as Import
 import Model.TweetStatus     as Import
 import Model.Permission      as Import

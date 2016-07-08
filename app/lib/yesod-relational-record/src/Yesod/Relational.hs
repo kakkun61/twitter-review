@@ -4,12 +4,16 @@
 module Yesod.Relational
     ( YesodRelational (..)
     , runQuery
+    , runUpdate
+    , runInsert
     ) where
 
 import           Database.HDBC.Types (IConnection)
 import qualified Database.HDBC.Record.Query as R (runQuery)
+import qualified Database.HDBC.Record.Update as R (runUpdate)
+import qualified Database.HDBC.Record.Insert as R (runInsert)
 import           Database.HDBC.SqlValue (SqlValue)
-import           Database.Relational.Query (Query)
+import           Database.Relational.Query (Query, Update, Insert)
 import           Database.Record.ToSql (ToSql)
 import           Database.Record.FromSql (FromSql)
 
@@ -26,3 +30,9 @@ class Monad (YesodRelationalMonad site) => YesodRelational site where
 
 runQuery :: (IConnection (YesodRelationalConnection site), ToSql SqlValue p, FromSql SqlValue a) => Query p a -> p -> YesodRelationalMonad site [a]
 runQuery query param = ask >>= \conn -> liftIO $ R.runQuery conn query param
+
+runUpdate :: (IConnection (YesodRelationalConnection site), ToSql SqlValue p) => Update p -> p -> YesodRelationalMonad site Integer
+runUpdate update param = ask >>= \conn -> liftIO $ R.runUpdate conn update param
+
+runInsert :: (IConnection (YesodRelationalConnection site), ToSql SqlValue p) => Insert p -> p -> YesodRelationalMonad site Integer
+runInsert insert param = ask >>= \conn -> liftIO $ R.runInsert conn insert param

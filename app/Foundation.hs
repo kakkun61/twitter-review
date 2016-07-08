@@ -7,15 +7,17 @@ import qualified Yesod.Auth.GoogleEmail2 as GoogleEmail2
 import Yesod.Auth.Message   (AuthMessage (InvalidLogin))
 import Yesod.Default.Util   (addStaticContentExternal)
 import Yesod.Core.Types     (Logger)
-import Yesod.Relational     (YesodRelational (..), YesodRelationalConnection, runQuery)
+import Yesod.Relational     (YesodRelational (..), YesodRelationalConnection, runQuery, runInsert, runUpdate)
 import Yesod.Auth.Relational (YesodAuthRelational (..), defaultMaybeAuthId)
 import qualified Yesod.Core.Unsafe as Unsafe
 import qualified Data.CaseInsensitive as CI
 import qualified Data.Text.Encoding as TE
 import Database.HDBC.MySQL  (Connection)
-import Database.Relational.Query (Relation, relationalQuery, relation, query, wheres, value, (!), (.=.))
+import Database.Relational.Query ( Relation, Update, relationalQuery, relation, query, wheres, value, (!), (.=.)
+                                 , typedUpdate, updateTarget, (<-#), just
+                                 )
 import Data.Pool            (Pool, withResource)
-import Model.Table.User     (User)
+import Model.Table.User     (User (..), UserNoId (..))
 import qualified Model.Table.User as User
 
 -- | The foundation datatype for your application. This can be a good place to
@@ -151,7 +153,45 @@ instance YesodAuth App where
     -- Override the above two destinations when a Referer: header is present
     redirectToReferer _ = True
 
-    authenticate _ = error "don't call me temporally"
+--     authenticate _ = error "don't call me temporally"
+    authenticate creds = runRelational $ do
+        $(logDebug) $ "creds id:" ++ (pack $ show $ credsIdent creds)
+        $(logDebug) $ "creds extra: " ++ (pack $ show $ credsExtra creds)
+        let ident = unpack $ credsIdent creds
+        mToken <- lift GoogleEmail2.getUserAccessToken
+        case mToken of
+            Just token@(GoogleEmail2.Token accTok' tokTyp) -> do
+                let accTok = unpack accTok'
+                when (tokTyp /= bearer) $ error $ unpack $ "unexpected token type\n\texpected: " <> bearer <> "\n\tactual: " <> tokTyp
+                master <- lift getYesod
+                let manager = authHttpManager master
+                mDisplayName <- fmap (fmap unpack . join . fmap (GoogleEmail2.personDisplayName)) $ lift (GoogleEmail2.getPerson manager token)
+                mUser <- runQuery (relationalQuery (userFromEmail ident)) ()
+                case mUser of
+                    [User uid _ mDisplayName' token'] -> do
+                        when (mDisplayName /= mDisplayName' || accTok /= token') $ do
+                            void $ runUpdate (updateUser uid mDisplayName accTok) ()
+                        return $ Authenticated uid
+                    [] -> do
+                        _ <- runInsert User.insertUserNoId (UserNoId ident mDisplayName accTok)
+                        -- uid <- insert $ UserNoId ident mDisplayName accTok -- FIXME
+                        return $ Authenticated 0 -- FIXME
+                    otherwise -> error "unexpected"
+            Nothing ->
+                return $ ServerError "no token gotten"
+        where
+            bearer = "Bearer"
+            userFromEmail :: String -> Relation () User
+            userFromEmail email = relation $ do
+                u <- query User.user
+                wheres $ u ! User.email' .=. value email
+                return u
+            updateUser :: Int64 -> Maybe String -> String -> Update ()
+            updateUser uid displayName token =
+                typedUpdate User.tableOfUser . updateTarget $ \proj -> do
+                    User.displayName' <-# value displayName
+                    User.token' <-# value token
+                    wheres $ proj ! User.id' .=. value uid
 --     authenticate creds = runDB $ do
 --         $(logDebug) $ "creds id:" ++ (pack $ show $ credsIdent creds)
 --         $(logDebug) $ "creds extra: " ++ (pack $ show $ credsExtra creds)
