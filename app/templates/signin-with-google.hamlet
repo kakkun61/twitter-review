@@ -1,2 +1,3 @@
-<a href=@{AuthR LoginR}>
+$#<a href=@{AuthR LoginR}>
+<a>
   <span class="signin-with-google" alt="Sign in with Google" />
