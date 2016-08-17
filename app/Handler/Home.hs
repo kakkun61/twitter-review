@@ -1,15 +1,11 @@
 module Handler.Home where
 
-import Import
-import qualified Database.Esqueleto as E
-import Model.Table.User
-import qualified Database.Relational.Query as RR
-import qualified Yesod.Relational as YR
-import qualified Yesod.Auth.Relational as YR
+import Import hiding (Set)
+import Database.Relational.Query
 
 getHomeR :: Handler Html
 getHomeR = do
-    mUser <- YR.maybeAuth
+    mUser <- maybeAuth
     $(logDebug) $ pack $ show mUser
     case mUser of
         Just user -> error "under construction"
