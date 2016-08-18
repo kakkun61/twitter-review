@@ -12,10 +12,12 @@ import Yesod.Auth.Relational (YesodAuthRelational (..), defaultMaybeAuthId)
 import qualified Yesod.Core.Unsafe as Unsafe
 import qualified Data.CaseInsensitive as CI
 import qualified Data.Text.Encoding as TE
+import Database.HDBC        (commit)
 import Database.HDBC.MySQL  (Connection)
-import Database.Relational.Query ( Relation, Update, relationalQuery, relation, query, wheres, value, (!), (.=.)
+import Database.Relational.Query ( Query, Relation, Update, relationalQuery, relation, query, wheres, value, (!), (.=.)
                                  , typedUpdate, updateTarget, (<-#), just
                                  )
+import Database.Relational.Query.Type (unsafeTypedQuery)
 import Data.Pool            (Pool, withResource)
 import Model.Table.User     (User (..), UserNoId (..))
 import qualified Model.Table.User as User
@@ -171,11 +173,19 @@ instance YesodAuth App where
                     [User uid _ mDisplayName' token'] -> do
                         when (mDisplayName /= mDisplayName' || accTok /= token') $ do
                             void $ runUpdate (updateUser uid mDisplayName accTok) ()
+                            $(logDebug) $ "updated"
                         return $ Authenticated uid
                     [] -> do
                         _ <- runInsert User.insertUserNoId (UserNoId ident mDisplayName accTok)
-                        -- uid <- insert $ UserNoId ident mDisplayName accTok -- FIXME
-                        return $ Authenticated 0 -- FIXME
+                        $(logDebug) $ "inserted"
+                        ask >>= liftIO . commit -- TODO create utility function
+                        $(logDebug) $ "commited"
+                        [uid] <- runQuery selectLastInsertId () -- TODO check length
+                        $(logDebug) $ pack $ "last insert id: " ++ show uid
+                        return $ Authenticated uid
+                        where
+                            selectLastInsertId :: Query () Int64 -- TODO move to appropriate location
+                            selectLastInsertId = unsafeTypedQuery "SELECT LAST_INSERT_ID()"
                     otherwise -> error "unexpected"
             Nothing ->
                 return $ ServerError "no token gotten"
