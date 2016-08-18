@@ -1,8 +1,7 @@
 module Template where
 
 import ClassyPrelude.Yesod
--- import Yesod.Auth
---
+import Yesod.Auth
 import Foundation
 import Settings
 import Settings.StaticFiles
