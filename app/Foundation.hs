@@ -180,9 +180,12 @@ instance YesodAuth App where
                         $(logDebug) $ "inserted"
                         run commit
                         $(logDebug) $ "commited"
-                        [uid] <- runQuery selectLastInsertId () -- TODO check length
-                        $(logDebug) $ pack $ "last insert id: " ++ show uid
-                        return $ Authenticated uid
+                        uids <- runQuery selectLastInsertId ()
+                        case uids of
+                            [uid] -> do
+                                $(logDebug) $ pack $ "last insert id: " ++ show uid
+                                return $ Authenticated uid
+                            _ -> error "unexpected"
                     otherwise -> error "unexpected"
             Nothing ->
                 return $ ServerError "no token gotten"
