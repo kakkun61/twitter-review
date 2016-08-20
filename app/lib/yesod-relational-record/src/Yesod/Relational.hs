@@ -6,6 +6,7 @@ module Yesod.Relational
     , runQuery
     , runUpdate
     , runInsert
+    , run
     ) where
 
 import           Database.HDBC.Types (IConnection)
@@ -36,3 +37,6 @@ runUpdate update param = ask >>= \conn -> liftIO $ R.runUpdate conn update param
 
 runInsert :: (IConnection (YesodRelationalConnection site), ToSql SqlValue p) => Insert p -> p -> YesodRelationalMonad site Integer
 runInsert insert param = ask >>= \conn -> liftIO $ R.runInsert conn insert param
+
+run :: (IConnection (YesodRelationalConnection site)) => (YesodRelationalConnection site -> IO a) -> YesodRelationalMonad site a
+run f = ask >>= (liftIO . f)

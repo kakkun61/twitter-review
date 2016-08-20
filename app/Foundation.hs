@@ -7,7 +7,7 @@ import qualified Yesod.Auth.GoogleEmail2 as GoogleEmail2
 import Yesod.Auth.Message   (AuthMessage (InvalidLogin))
 import Yesod.Default.Util   (addStaticContentExternal)
 import Yesod.Core.Types     (Logger)
-import Yesod.Relational     (YesodRelational (..), YesodRelationalConnection, runQuery, runInsert, runUpdate)
+import Yesod.Relational     (YesodRelational (..), YesodRelationalConnection, runQuery, runInsert, runUpdate, run)
 import Yesod.Auth.Relational (YesodAuthRelational (..), defaultMaybeAuthId)
 import qualified Yesod.Core.Unsafe as Unsafe
 import qualified Data.CaseInsensitive as CI
@@ -178,7 +178,7 @@ instance YesodAuth App where
                     [] -> do
                         _ <- runInsert User.insertUserNoId (UserNoId ident mDisplayName accTok)
                         $(logDebug) $ "inserted"
-                        ask >>= liftIO . commit -- TODO create utility function
+                        run commit
                         $(logDebug) $ "commited"
                         [uid] <- runQuery selectLastInsertId () -- TODO check length
                         $(logDebug) $ pack $ "last insert id: " ++ show uid
