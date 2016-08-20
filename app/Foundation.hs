@@ -17,7 +17,7 @@ import Database.HDBC.MySQL  (Connection)
 import Database.Relational.Query ( Query, Relation, Update, relationalQuery, relation, query, wheres, value, (!), (.=.)
                                  , typedUpdate, updateTarget, (<-#), just
                                  )
-import Database.Relational.Query.Type (unsafeTypedQuery)
+import Database.Relational.Query.MySQL (selectLastInsertId)
 import Data.Pool            (Pool, withResource)
 import Model.Table.User     (User (..), UserNoId (..))
 import qualified Model.Table.User as User
@@ -183,9 +183,6 @@ instance YesodAuth App where
                         [uid] <- runQuery selectLastInsertId () -- TODO check length
                         $(logDebug) $ pack $ "last insert id: " ++ show uid
                         return $ Authenticated uid
-                        where
-                            selectLastInsertId :: Query () Int64 -- TODO move to appropriate location
-                            selectLastInsertId = unsafeTypedQuery "SELECT LAST_INSERT_ID()"
                     otherwise -> error "unexpected"
             Nothing ->
                 return $ ServerError "no token gotten"

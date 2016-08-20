@@ -7,6 +7,7 @@ resolver: lts-5.4
 packages:
 - '.'
 - lib/yesod-relational-record
+- lib/relational-record-mysql
 #- lib/relational-pool
 - location:
     git: git@github.com:bos/hdbc-mysql.git

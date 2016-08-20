@@ -1,0 +1,39 @@
+name:              relational-record-mysql
+version:           0.0.0
+synopsis:          MySQL specific APIs for relational-record
+homepage:
+category:          Database
+author:            Kazuki Okamoto <kazuki.okamoto@kakkun61.com>
+stability:         alpha
+cabal-version:     >= 1.10
+build-type:        Simple
+
+Flag dev
+    Description:   development flag
+    Default:       False
+
+library
+    hs-source-dirs:     src
+    exposed-modules:    Database.Relational.Query.MySQL
+
+    if flag(dev)
+        cpp-options:    -DDEVELOPMENT
+        ghc-options:    -Wall -fwarn-tabs -O0
+    else
+        ghc-options:    -Wall -fwarn-tabs -O2
+
+    default-extensions:
+
+    build-depends:      base
+                      , HDBC
+                      , HDBC-session
+                      , names-th
+                      , persistable-record
+                      , persistable-types-HDBC-pg
+                      , relational-query
+                      , relational-query-HDBC
+                      , relational-record
+                      , relational-schemas
+                      , sql-words
+
+    default-language:   Haskell2010
