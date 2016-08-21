@@ -4,18 +4,15 @@ import Import.NoFoundation
 import Text.Hamlet          (hamletFile)
 import Text.Jasmine         (minifym)
 import qualified Yesod.Auth.GoogleEmail2 as GoogleEmail2
-import Yesod.Auth.Message   (AuthMessage (InvalidLogin))
 import Yesod.Default.Util   (addStaticContentExternal)
 import Yesod.Core.Types     (Logger)
-import Yesod.Relational     (YesodRelational (..), YesodRelationalConnection, runQuery, runInsert, runUpdate, run)
-import Yesod.Auth.Relational (YesodAuthRelational (..), defaultMaybeAuthId)
 import qualified Yesod.Core.Unsafe as Unsafe
 import qualified Data.CaseInsensitive as CI
 import qualified Data.Text.Encoding as TE
 import Database.HDBC        (commit)
 import Database.HDBC.MySQL  (Connection)
-import Database.Relational.Query ( Query, Relation, Update, relationalQuery, relation, query, wheres, value, (!), (.=.)
-                                 , typedUpdate, updateTarget, (<-#), just
+import Database.Relational.Query ( Relation, Update, relationalQuery, relation, query, wheres, value, (!), (.=.)
+                                 , typedUpdate, updateTarget, (<-#)
                                  )
 import Database.Relational.Query.MySQL (selectLastInsertId)
 import Data.Pool            (Pool, withResource)
@@ -187,7 +184,7 @@ instance YesodAuth App where
                                 $(logDebug) $ pack $ "last insert id: " ++ show uid
                                 return $ Authenticated uid
                             _ -> error "unexpected"
-                    otherwise -> error "unexpected"
+                    _ -> error "unexpected"
             Nothing ->
                 return $ ServerError "no token gotten"
         where

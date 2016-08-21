@@ -12,9 +12,7 @@ module Application
     , handler
     ) where
 
-import Control.Monad.Logger                 (liftLoc, runLoggingT)
-import Database.Persist.MySQL               (createMySQLPool, myConnInfo,
-                                             myPoolSize)
+import Control.Monad.Logger                 (liftLoc)
 import Import
 import Language.Haskell.TH.Syntax           (qLocation)
 import Network.Wai (Middleware)
@@ -71,8 +69,6 @@ makeFoundation appSettings = do
         -- The App {..} syntax is an example of record wild cards. For more
         -- information, see:
         -- https://ocharles.org.uk/blog/posts/2014-12-04-record-wildcards.html
-        tempFoundation = mkFoundation $ error "connPool forced in tempFoundation"
-        logFunc = messageLoggerSource tempFoundation appLogger
 
     -- Create the database connection pool
     pool <- createPool connectDB disconnect 1 20 10

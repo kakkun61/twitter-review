@@ -1,7 +1,6 @@
 module Handler.Home where
 
 import Import hiding (Set)
-import Database.Relational.Query
 
 getHomeR :: Handler Html
 getHomeR = do
@@ -20,7 +19,6 @@ getHomeR = do
 --                     $(widgetFile "home")
         Nothing ->
             defaultLayout $ do
-                let signinWithGoogle = $(widgetFile "signin-with-google")
                 let accounts = []
                 headerWidget Nothing
                 homeWidget Nothing
