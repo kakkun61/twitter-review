@@ -174,6 +174,7 @@ instance YesodAuth App where
                         when (mDisplayName /= mDisplayName' || accTok /= token') $ do
                             void $ runUpdate (updateUser uid mDisplayName accTok) ()
                             $(logDebug) $ "updated"
+                            run commit
                         return $ Authenticated uid
                     [] -> do
                         _ <- runInsert User.insertUserNoId (UserNoId ident mDisplayName accTok)
