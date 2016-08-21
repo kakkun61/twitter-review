@@ -21,6 +21,8 @@ library
                      Model.TweetStatus
                      Model.Permission
                      Model.Table.User
+                     Model.Table.Account
+                     Model.Table.UserAccountRelation
                      Settings
                      Settings.StaticFiles
                      Template
