@@ -245,7 +245,7 @@ instance YesodAuthRelational App where
             [] -> return Nothing
             u : _ -> return $ Just u
         where
-            go :: Relation () (User.User)
+            go :: Relation () (User)
             go = relation $ do
                 u <- query User.user
                 wheres $ u ! User.id' .=. value ident
