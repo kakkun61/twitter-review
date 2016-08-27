@@ -152,7 +152,6 @@ instance YesodAuth App where
     -- Override the above two destinations when a Referer: header is present
     redirectToReferer _ = True
 
---     authenticate _ = error "don't call me temporally"
     authenticate creds = runRelational $ do
         $(logDebug) $ "creds id:" ++ (pack $ show $ credsIdent creds)
         $(logDebug) $ "creds extra: " ++ (pack $ show $ credsExtra creds)
@@ -161,33 +160,36 @@ instance YesodAuth App where
         case mToken of
             Just token@(GoogleEmail2.Token accTok' tokTyp) -> do
                 let accTok = unpack accTok'
-                when (tokTyp /= bearer) $ error $ unpack $ "unexpected token type\n\texpected: " <> bearer <> "\n\tactual: " <> tokTyp
-                master <- lift getYesod
-                let manager = authHttpManager master
-                mDisplayName <- fmap (fmap unpack . join . fmap (GoogleEmail2.personDisplayName)) $ lift (GoogleEmail2.getPerson manager token)
-                mUser <- runQuery (relationalQuery (userFromEmail ident)) ()
-                case mUser of
-                    [User uid _ mDisplayName' token'] -> do
-                        when (mDisplayName /= mDisplayName' || accTok /= token') $ do
-                            void $ runUpdate (updateUser uid mDisplayName accTok) ()
-                            $(logDebug) $ "updated"
+                if (tokTyp /= bearer)
+                then return $ ServerError $ "unexpected token type\n\texpected: " <> bearer <> "\n\tactual: " <> tokTyp
+                else do
+                    master <- lift getYesod
+                    let manager = authHttpManager master
+                    mDisplayName <- fmap (fmap unpack . join . fmap (GoogleEmail2.personDisplayName)) $ lift (GoogleEmail2.getPerson manager token)
+                    mUser <- runQuery (relationalQuery (userFromEmail ident)) ()
+                    case mUser of
+                        [User uid _ mDisplayName' token'] -> do
+                            when (mDisplayName /= mDisplayName' || accTok /= token') $ do
+                                void $ runUpdate (updateUser uid mDisplayName accTok) ()
+                                $(logDebug) $ "updated"
+                                run commit
+                            return $ Authenticated uid
+                        [] -> do
+                            _ <- runInsert User.insertUserNoId (UserNoId ident mDisplayName accTok)
+                            $(logDebug) $ "inserted"
                             run commit
-                        return $ Authenticated uid
-                    [] -> do
-                        _ <- runInsert User.insertUserNoId (UserNoId ident mDisplayName accTok)
-                        $(logDebug) $ "inserted"
-                        run commit
-                        $(logDebug) $ "commited"
-                        uids <- runQuery selectLastInsertId ()
-                        case uids of
-                            [uid] -> do
-                                $(logDebug) $ pack $ "last insert id: " ++ show uid
-                                return $ Authenticated uid
-                            _ -> error "unexpected"
-                    _ -> error "unexpected"
+                            $(logDebug) $ "commited"
+                            uids <- runQuery selectLastInsertId ()
+                            case uids of
+                                [uid] -> do
+                                    $(logDebug) $ pack $ "last insert id: " ++ show uid
+                                    return $ Authenticated uid
+                                _ -> return $ ServerError "unexpected"
+                        _ -> return $ ServerError "unexpected"
             Nothing ->
                 return $ ServerError "no token gotten"
         where
+            bearer :: Text
             bearer = "Bearer"
             userFromEmail :: String -> Relation () User
             userFromEmail email = relation $ do
@@ -200,30 +202,6 @@ instance YesodAuth App where
                     User.displayName' <-# value displayName
                     User.token' <-# value token
                     wheres $ proj ! User.id' .=. value uid
---     authenticate creds = runDB $ do
---         $(logDebug) $ "creds id:" ++ (pack $ show $ credsIdent creds)
---         $(logDebug) $ "creds extra: " ++ (pack $ show $ credsExtra creds)
---         let ident = credsIdent creds
---         mToken <- lift GoogleEmail2.getUserAccessToken
---         case mToken of
---             Just token@(GoogleEmail2.Token accTok tokTyp) -> do
---                 when (tokTyp /= bearer) $ error $ unpack $ "unexpected token type\n\texpected: " <> bearer <> "\n\tactual: " <> tokTyp
---                 master <- lift getYesod
---                 let manager = authHttpManager master
---                 mDisplayName <- fmap (join . fmap GoogleEmail2.personDisplayName) $ lift (GoogleEmail2.getPerson manager token)
---                 mUser <- getBy $ UniqueUser $ ident
---                 case mUser of
---                     Just (Entity uid (User _ mDisplayName' token')) -> do
---                         when (mDisplayName /= mDisplayName' || accTok /= token') $
---                             update uid [UserDisplayName =. mDisplayName, UserToken =. accTok]
---                         return $ Authenticated uid
---                     Nothing -> do
---                         uid <- insert $ User ident mDisplayName accTok
---                         return $ Authenticated uid
---             Nothing ->
---                 return $ ServerError "no token gotten"
---         where
---             bearer = "Bearer"
 
     -- You can add other plugins like BrowserID, email or OAuth here
     authPlugins m = [GoogleEmail2.authGoogleEmailSaveToken
