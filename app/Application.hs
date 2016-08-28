@@ -27,6 +27,7 @@ import Network.Wai.Middleware.RequestLogger (Destination (Logger),
 import System.Log.FastLogger                (defaultBufSize, newStdoutLoggerSet,
                                              toLogStr)
 import Database.HDBC                        (disconnect)
+import Database.HDBC.MySQL                  (withRTSSignalsBlocked)
 import Data.Pool                            (createPool)
 
 -- Import all relevant handler modules here.
@@ -121,7 +122,7 @@ getAppSettings = loadAppSettings [configSettingsYml] [] useEnv
 
 -- | main function for use by yesod devel
 develMain :: IO ()
-develMain = develMainHelper getApplicationDev
+develMain = withRTSSignalsBlocked $ develMainHelper getApplicationDev
 
 -- | The @main@ function for an executable running this site.
 appMain :: IO ()
@@ -141,7 +142,7 @@ appMain = do
     app <- makeApplication foundation
 
     -- Run the application with Warp
-    runSettings (warpSettings foundation) app
+    withRTSSignalsBlocked $ runSettings (warpSettings foundation) app -- usage of withRTSSignalsBlocked may be bad
 
 
 --------------------------------------------------------------
