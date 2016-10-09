@@ -10,7 +10,7 @@ packages:
 - lib/relational-record-mysql
 #- lib/relational-pool
 - location:
-    git: git@github.com:bos/hdbc-mysql.git
+    git: git@github.com:ryantm/hdbc-mysql.git
     commit: d43ea057019ff683f278f36af410f4d3cbc731bc
 - location:
     git: git@github.com:kakkun61/haskell-relational-record.git
