@@ -12,9 +12,17 @@ import Language.Haskell.TH (Q, Dec)
 import System.IO (IO)
 import Data.String (String)
 import Text.Show (Show)
+import Data.Maybe (maybe)
+import System.Environment (lookupEnv)
+import Control.Applicative ((<$>))
+import Prelude (id, putStrLn)
 
 connectDB :: IO Connection
-connectDB = connectMySQL defaultMySQLConnectInfo { mysqlDatabase = "INFORMATION_SCHEMA"}
+connectDB = do
+    password <- maybe "" id <$> lookupEnv "MYSQL_PASSWORD"
+    connectMySQL defaultMySQLConnectInfo { mysqlDatabase = "INFORMATION_SCHEMA"
+                                         , mysqlPassword = password
+                                         }
 
 defineTable :: String -> Q [Dec]
 defineTable tableName =
