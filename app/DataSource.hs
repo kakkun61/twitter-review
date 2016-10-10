@@ -15,7 +15,7 @@ import Text.Show (Show)
 import Data.Maybe (maybe)
 import System.Environment (lookupEnv)
 import Control.Applicative ((<$>))
-import Prelude (id, putStrLn)
+import Prelude (id)
 
 connectDB :: IO Connection
 connectDB = do
