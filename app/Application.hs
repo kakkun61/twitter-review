@@ -42,6 +42,8 @@ import Handler.AccountSetting
 import Handler.MasterLogin
 import Handler.NewTweet
 
+import Debug.Trace
+
 -- This line actually creates our YesodDispatch instance. It is the second half
 -- of the call to mkYesodData which occurs in Foundation.hs. Please see the
 -- comments there for more details.
@@ -62,7 +64,7 @@ makeFoundation appSettings = do
         (appStaticDir appSettings)
 
     -- Create the database connection pool
-    appConnPool <- createPool connectDB disconnect 1 20 10
+    appConnPool <- createPool (trace "connect" connectDB) (trace "disconnect" disconnect) 1 20 10
 
     -- Perform database migration using our application's logging settings.
 --     runLoggingT (runSqlPool (runMigration migrateAll) pool) logFunc
