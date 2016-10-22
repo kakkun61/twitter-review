@@ -15,7 +15,6 @@ import Database.Relational.Query ( Relation, Update, relationalQuery, relation, 
                                  , typedUpdate, updateTarget, (<-#)
                                  )
 import Database.Relational.Query.MySQL (selectLastInsertId)
-import Data.Pool            (Pool, withResource)
 import Model.Table.User     (User (..), UserNoId (..))
 import qualified Model.Table.User as User
 
@@ -26,7 +25,6 @@ import qualified Model.Table.User as User
 data App = App
     { appSettings    :: AppSettings
     , appStatic      :: Static -- ^ Settings for static file serving.
-    , appConnPool    :: Pool Connection -- ^ Database connection pool.
     , appHttpManager :: Manager
     , appLogger      :: Logger
     }
@@ -140,7 +138,8 @@ instance YesodRelational App where
     -- runRelational :: YesodRelationalMonad site a -> HandlerT site IO a
     runRelational action = do
         master <- getYesod
-        withResource (appConnPool master) $ runReaderT action
+        con <- liftIO connectDB
+        runReaderT action con
 
 instance YesodAuth App where
     type AuthId App = Int64

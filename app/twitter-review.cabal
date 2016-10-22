@@ -112,7 +112,6 @@ library
                  , persistable-record
                  , HDBC
                  , HDBC-mysql
-                 , resource-pool
                  , relational-record-mysql
 
 executable         twitter-review

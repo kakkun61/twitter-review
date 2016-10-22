@@ -28,7 +28,6 @@ import System.Log.FastLogger                (defaultBufSize, newStdoutLoggerSet,
                                              toLogStr)
 import Database.HDBC                        (disconnect)
 import Database.HDBC.MySQL                  (withRTSSignalsBlocked)
-import Data.Pool                            (createPool)
 
 -- Import all relevant handler modules here.
 -- Don't forget to add new modules to your cabal file!
@@ -62,9 +61,6 @@ makeFoundation appSettings = do
     appStatic <-
         (if appMutableStatic appSettings then staticDevel else static)
         (appStaticDir appSettings)
-
-    -- Create the database connection pool
-    appConnPool <- createPool (trace "connect" connectDB) (trace "disconnect" disconnect) 1 20 10
 
     -- Perform database migration using our application's logging settings.
 --     runLoggingT (runSqlPool (runMigration migrateAll) pool) logFunc
