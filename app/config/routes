@@ -7,7 +7,7 @@
 /                                            HomeR                GET
 /login                                       MasterLoginR         GET
 
--- /accounts/new                                NewAccountR          GET
+/accounts/new                                NewAccountR          GET
 
 -- /accounts/auth/forward                       AccountAuthForwardR  GET
 -- /accounts/auth/callback                      AccountAuthCallbackR GET
