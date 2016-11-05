@@ -3,5 +3,5 @@
 $maybe user <- mUser
   <p>user : #{fromMaybe "" $ displayName user} (#{email user})
   <p>
-$#    <a href=@{AuthR LogoutR}>logout
+    <a href=@{AuthR LogoutR}>
       Logout
