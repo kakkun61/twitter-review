@@ -9,10 +9,10 @@
 
 /accounts/new                                NewAccountR          GET
 
--- /accounts/auth/forward                       AccountAuthForwardR  GET
--- /accounts/auth/callback                      AccountAuthCallbackR GET
+/accounts/auth/forward                       AccountAuthForwardR  GET
+/accounts/auth/callback                      AccountAuthCallbackR GET
 
 -- /account/#AccountIdParam                     AccountR             GET
--- /account/#AccountIdParam/setting             AccountSettingR      GET POST
+/account/#AccountIdParam/setting             AccountSettingR      GET POST
 -- /account/#AccountIdParam/tweets/new          NewTweetR            GET POST
 -- /account/#AccountIdParam/tweet/#TweetIdParam TweetR               GET POST

@@ -1,18 +1,21 @@
-module Model.Permission where
+module Model.Permission
+    ( Permission (..)
+    ) where
 
 import ClassyPrelude.Yesod
-import Database.Persist.Sql
+import Data.Convertible
 
 data Permission = Admin | ReadWrite
                   deriving (Show, Read, Eq)
 
-instance PersistField Permission where
-    toPersistValue Admin     = PersistInt64 0
-    toPersistValue ReadWrite = PersistInt64 1
+admin     = 0
+readWrite = 1
 
-    fromPersistValue (PersistInt64 0) = Right Admin
-    fromPersistValue (PersistInt64 1) = Right ReadWrite
-    fromPersistValue _                = Left "only PersistInt64 can be converted to Permission"
+instance Convertible Permission Int32 where
+    safeConvert Admin     = Right 0
+    safeConvert ReadWrite = Right 1
 
-instance PersistFieldSql Permission where
-    sqlType _ = SqlInt32
+instance Convertible Int32 Permission where
+    safeConvert n | n == admin     = Right Admin
+                  | n == readWrite = Right ReadWrite
+                  | otherwise      = convError ("must be " ++ (show admin) ++ " or " ++ (show readWrite)) n

@@ -3,6 +3,7 @@
 
 module Yesod.Relational
     ( YesodRelational (..)
+    , YesodRelationalMonad
     , runQuery
     , runUpdate
     , runInsert
