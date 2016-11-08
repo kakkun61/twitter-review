@@ -98,8 +98,7 @@ instance Yesod App where
         $(logDebug) $ "isAuthorized: " <> (pack $ show r)
         mUserId <- maybeAuthId
         case mUserId of
-            Just userId -> do
-                -- check
+            Just _ -> do
                 return Authorized
             Nothing -> return AuthenticationRequired
 
