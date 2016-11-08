@@ -94,15 +94,14 @@ instance Yesod App where
     isAuthorized RobotsR      _ = return Authorized
     isAuthorized HomeR        _ = return Authorized
     isAuthorized MasterLoginR _ = return Authorized
---     isAuthorized r            _ = do
---         $(logDebug) $ "isAuthorized: " <> (pack $ show r)
---         mUserId <- maybeAuthId
---         case mUserId of
---             Just userId -> do
---                 -- check
---                 return Authorized
---             Nothing -> return AuthenticationRequired
-    isAuthorized _ _ = return Authorized
+    isAuthorized r            _ = do
+        $(logDebug) $ "isAuthorized: " <> (pack $ show r)
+        mUserId <- maybeAuthId
+        case mUserId of
+            Just userId -> do
+                -- check
+                return Authorized
+            Nothing -> return AuthenticationRequired
 
     -- This function creates static content files in the static folder
     -- and names them based on a hash of their content. This allows
