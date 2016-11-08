@@ -94,7 +94,6 @@ getAccountAuthCallbackR = do
                             u <- query Account.account
                             wheres $ u ! Account.id' .=. value userId
                             return u
-            --getBy $ UniqueAccount userId
             case mAccount of
                 [Account _ screenName' tok' tokSec']
                     | screenName /= screenName' || token /= tok' || tokenSecret /= tokSec' -> do
@@ -103,11 +102,8 @@ getAccountAuthCallbackR = do
                     | otherwise -> return ()
                 [] -> do
                     void $ runInsert Account.insertAccount $ Account userId screenName token tokenSecret
+                    void $ runInsert UserAccountRelation.insertUserAccountRelationNoId $ UserAccountRelationNoId uid userId $ convert Admin
                     run commit
-                    aids <- runQuery selectLastInsertId ()
-                    case aids of
-                        [aid] -> void $ runInsert UserAccountRelation.insertUserAccountRelationNoId $ UserAccountRelationNoId uid aid $ convert Admin
-                        _ -> error "unexpected"
                 _ -> error "unexpected"
             where
                 updateAccount :: Int64 -> String -> String -> String -> Update ()
