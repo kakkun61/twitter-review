@@ -1,12 +1,11 @@
-$with screenName <- accountScreenName account
-  <p>
-    @#{screenName} Setting
-  <p>
-    <a href="https://twitter.com/#{screenName}">
-      Twitter
-  <p>
-    <a>
-      Signout
-  <p>
-    <a>
-      Delete this account from Review for Twitter
+<p>
+  @#{screenName} Setting
+<p>
+  <a href="https://twitter.com/#{screenName}">
+    Twitter
+<p>
+  <a>
+    Signout
+<p>
+  <a>
+    Delete this account from Review for Twitter

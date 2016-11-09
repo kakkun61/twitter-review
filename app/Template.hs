@@ -5,6 +5,7 @@ import Yesod.Auth
 import Foundation
 import Settings
 import Settings.StaticFiles
+import Model.Table.Account
 import Model.Table.User
 
 headerWidget :: Maybe User -> Widget
@@ -14,6 +15,12 @@ homeWidget :: Maybe User -> Widget
 homeWidget mUser = do
   let signinWithGoogle = $(widgetFile "signin-with-google")
   $(widgetFile "home")
+
+accountSettingWidget :: Account -> Widget
+accountSettingWidget account = do
+    go $ screenName account
+    where
+        go screenName = $(widgetFile "account-setting")
 
 -- newtype TweetFormData = TweetFormData { tweetFormText :: Text }
 --     deriving Show
