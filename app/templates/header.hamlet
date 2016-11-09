@@ -1,7 +1,7 @@
 <header>
   <p><a href=@{HomeR}>Home</a>
 $maybe user <- mUser
-  <p>user : #{fromMaybe "" $ displayName user} (#{email user})
+  <p>user : #{fromMaybe "" $ User.displayName user} (#{User.email user})
   <p>
     <a href=@{AuthR LogoutR}>
       Logout

@@ -21,9 +21,9 @@ getHomeR = do
             $(logDebug) $ pack $ show accounts
             defaultLayout $ do
                 headerWidget mUser
-                homeWidget mUser
+                homeWidget mUser accounts
         Nothing ->
             defaultLayout $ do
                 let accounts = []
                 headerWidget Nothing
-                homeWidget Nothing
+                homeWidget Nothing []
