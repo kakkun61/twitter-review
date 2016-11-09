@@ -9,9 +9,6 @@ import Data.Text.Encoding.Error (lenientDecode)
 import Text.Read
 import Data.Maybe
 import Web.Authenticate.OAuth   hiding (insert)
-import Database.Relational.Query ( Relation, Update, relationalQuery, relation, query, wheres, value, (!), (.=.)
-                                 , typedUpdate, updateTarget, (<-#)
-                                 )
 import Database.Relational.Query.MySQL (selectLastInsertId)
 import Database.HDBC (IConnection, commit)
 import Model.Table.User (User (..), UserNoId (..))
