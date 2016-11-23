@@ -23,6 +23,8 @@ library
                      Model.Table.User
                      Model.Table.Account
                      Model.Table.UserAccountRelation
+                     Model.Table.Tweet
+                     Model.Table.TweetCandidate
                      Settings
                      Settings.StaticFiles
                      Template

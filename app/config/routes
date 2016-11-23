@@ -14,5 +14,5 @@
 
 /account/#AccountIdParam                     AccountR             GET
 /account/#AccountIdParam/setting             AccountSettingR      GET POST
--- /account/#AccountIdParam/tweets/new          NewTweetR            GET POST
--- /account/#AccountIdParam/tweet/#TweetIdParam TweetR               GET POST
+/account/#AccountIdParam/tweets/new          NewTweetR            GET POST
+/account/#AccountIdParam/tweet/#TweetIdParam TweetR               GET POST

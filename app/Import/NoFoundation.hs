@@ -15,6 +15,7 @@ import Yesod.Core.Types      as Import (loggerSet)
 import Yesod.Default.Config2 as Import
 import DataSource            as Import
 import Data.Convertible      as Import
-import Database.Relational.Query as Import ( Relation, Update, relationalQuery, relation, query, wheres, value, (!)
-                                           , (.=.), typedUpdate, updateTarget, (<-#)
+import Database.Relational.Query as Import ( Relation, Update, relationalQuery, relation, query, queryList, wheres, value, (!)
+                                           , (.=.), (.>.), exists, not', typedUpdate, updateTarget, (<-#)
                                            )
+import Database.Relational.Query.Projectable as Import ((|$|), (|*|))

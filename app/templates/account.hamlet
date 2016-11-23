@@ -1,5 +1,5 @@
 <h1>
-  Tweet List of @#{accountScreenName account}
+  Tweet List of @#{Account.screenName account}
 <div #new-tweet>
   <a .btn .btn-primary role=button href=@{NewTweetR accountIdParam}>Create new tweet
 <div #tweet-status .btn-group role=group>
@@ -23,10 +23,9 @@
       Closed
 <div>
   $forall (tw, twc) <- rows
-    $with tweet <- entityVal tw, tweetKey <- entityKey tw, tweetCandidate <- entityVal twc
-      <div .tweet>
-        <p>#{tweetCandidateText tweetCandidate}
-        <div .meta>
-          #{tweetStatus tweet}
-          <a href=@{TweetR accountIdParam (fromSqlKey tweetKey)}>
-            #{formatRFC1123 $ tweetCreated tweet}
+    <div .tweet>
+      <p>#{TweetCandidate.text twc}
+      <div .meta>
+        #{Tweet.status tw}
+        <a href=@{TweetR accountIdParam (Tweet.id tw)}>
+          #{show $ Tweet.created tw}
