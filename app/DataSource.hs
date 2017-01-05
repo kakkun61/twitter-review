@@ -11,18 +11,24 @@ import Database.Relational.Schema.MySQLInfo.Config (config)
 import Language.Haskell.TH (Q, Dec)
 import System.IO (IO)
 import Data.String (String)
+import Text.Read (read)
 import Text.Show (Show)
-import Data.Maybe (maybe)
+import Data.Maybe (Maybe (Nothing), maybe)
 import System.Environment (lookupEnv)
 import Control.Applicative ((<$>))
+import Control.Monad ((>>=))
 import Prelude (id, putStrLn)
 
 connectDB :: IO Connection
 connectDB = do
-    password <- maybe "" id <$> lookupEnv "MYSQL_PASSWORD"
-    connectMySQL defaultMySQLConnectInfo { mysqlDatabase = "INFORMATION_SCHEMA"
-                                         , mysqlPassword = password
-                                         }
+    let mysqlUser = "root"
+        mysqlDatabase = "INFORMATION_SCHEMA"
+        mysqlUnixSocket = ""
+        mysqlGroup = Nothing
+    mysqlHost     <- maybe "" id <$> lookupEnv "TWITTER_REVIEW_DB_PORT_3306_TCP_ADDR"
+    mysqlPassword <- maybe "" id <$> lookupEnv "TWITTER_REVIEW_DB_ENV_MYSQL_ROOT_PASSWORD"
+    mysqlPort     <- maybe 0 read <$> lookupEnv "TWITTER_REVIEW_DB_PORT_3306_TCP_PORT"
+    connectMySQL MySQLConnectInfo { .. }
 
 defineTable :: String -> Q [Dec]
 defineTable tableName =
