@@ -91,3 +91,6 @@ fabric.properties
 
 .idea/
 *.iml
+
+# secret file
+/docker/init-app-server-secret.bash

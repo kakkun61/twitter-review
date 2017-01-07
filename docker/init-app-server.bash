@@ -22,4 +22,6 @@ pushd /wd/app
   stack build --only-dependencies --ghc-options -j
 popd
 
+source /app/docker/init-app-server-secret.bash
+
 set +x
