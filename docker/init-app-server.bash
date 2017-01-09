@@ -9,9 +9,9 @@ echo 'ssh-agent -k' >> $HOME/.bash_logout
 
 eval "$(stack --bash-completion-script stack)"
 
-alias sync='rsync -a --delete --exclude=app/.stack-work /app/ /wd'
+alias appsync='rsync -a --delete --exclude=app/.stack-work /app/ /wd'
 
-sync
+appsync
 
 alias stack='stack --allow-different-user'
 
