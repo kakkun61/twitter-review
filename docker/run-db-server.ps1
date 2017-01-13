@@ -8,5 +8,6 @@ docker run `
   -e MYSQL_DATABASE='twitter-review' `
   -e MYSQL_USER='twitter-review' `
   -e MYSQL_PASSWORD="$user_password" `
+  -d `
   --name twitter-review-db `
   mysql
