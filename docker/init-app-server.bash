@@ -26,8 +26,8 @@ alias stack='stack --allow-different-user'
 apt install -y make gcc libgmp3-dev libmysqlclient-dev pkgconf libpcre3-dev
 pushd /wd/app
   stack setup --resolver=lts-5.4
-  stack install --resolver=lts-5.4 --ghc-options -j yesod-bin
-  stack build --only-dependencies --ghc-options -j
+  stack install --resolver=lts-5.4 yesod-bin
+  stack build --only-dependencies
 popd
 
 source /app/docker/init-app-server-secret.bash
