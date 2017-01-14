@@ -26,7 +26,6 @@ import Network.Wai.Middleware.RequestLogger (Destination (Logger),
                                              mkRequestLogger, outputFormat)
 import System.Log.FastLogger                (defaultBufSize, newStdoutLoggerSet,
                                              toLogStr)
-import Database.HDBC                        (disconnect)
 import Database.HDBC.MySQL                  (withRTSSignalsBlocked)
 
 -- Import all relevant handler modules here.

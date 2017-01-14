@@ -9,13 +9,10 @@ import Data.Text.Encoding.Error (lenientDecode)
 import Text.Read
 import Data.Maybe
 import Web.Authenticate.OAuth   hiding (insert)
-import Database.Relational.Query.MySQL (selectLastInsertId)
 import Database.HDBC (IConnection, commit)
-import Model.Table.User (User (..), UserNoId (..))
-import qualified Model.Table.User as User
 import Model.Table.Account (Account (..))
 import qualified Model.Table.Account as Account
-import Model.Table.UserAccountRelation (UserAccountRelation (..), UserAccountRelationNoId (..))
+import Model.Table.UserAccountRelation (UserAccountRelationNoId (..))
 import qualified Model.Table.UserAccountRelation as UserAccountRelation
 
 mkOAuth :: App -> OAuth
@@ -102,14 +99,13 @@ getAccountAuthCallbackR = do
                     void $ runInsert UserAccountRelation.insertUserAccountRelationNoId $ UserAccountRelationNoId uid userId $ convert Admin
                     run commit
                 _ -> error "unexpected"
-            where
-                updateAccount :: Int64 -> String -> String -> String -> Update ()
-                updateAccount aid screenName token tokenSecret =
-                    typedUpdate Account.tableOfAccount . updateTarget $ \proj -> do
-                        Account.screenName' <-# value screenName
-                        Account.token' <-# value token
-                        Account.tokenSecret' <-# value tokenSecret
-                        wheres $ proj ! Account.id' .=. value aid
+        updateAccount :: Int64 -> String -> String -> String -> Update ()
+        updateAccount aid screenName token tokenSecret =
+            typedUpdate Account.tableOfAccount . updateTarget $ \proj -> do
+                Account.screenName' <-# value screenName
+                Account.token' <-# value token
+                Account.tokenSecret' <-# value tokenSecret
+                wheres $ proj ! Account.id' .=. value aid
 
 bsToText :: ByteString -> Text
 bsToText = decodeUtf8With lenientDecode

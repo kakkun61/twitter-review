@@ -8,6 +8,8 @@ import Data.Convertible
 data Permission = Admin | ReadWrite
                   deriving (Show, Read, Eq)
 
+admin     :: Int32
+readWrite :: Int32
 admin     = 0
 readWrite = 1
 

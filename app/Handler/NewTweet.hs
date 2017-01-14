@@ -2,7 +2,6 @@ module Handler.NewTweet where
 
 import Import
 import Data.Time.LocalTime
-import Data.Convertible
 import Database.HDBC (commit)
 import Database.Relational.Query.MySQL
 import qualified Model.Table.User as User

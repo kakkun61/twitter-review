@@ -2,7 +2,7 @@
 
 module Model.Table.TweetCandidate where
 
-import Prelude (String, Maybe)
+import Prelude (String)
 import Database.HDBC.Query.TH
 import Database.Relational.Query
 import DataSource (defineTable)

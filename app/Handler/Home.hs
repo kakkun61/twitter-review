@@ -24,6 +24,5 @@ getHomeR = do
                 homeWidget mUser accounts
         Nothing ->
             defaultLayout $ do
-                let accounts = []
                 headerWidget Nothing
                 homeWidget Nothing []

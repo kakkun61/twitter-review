@@ -11,9 +11,6 @@ import qualified Data.CaseInsensitive as CI
 import qualified Data.Text.Encoding as TE
 import Database.HDBC        (commit)
 import Database.HDBC.MySQL  (Connection)
-import Database.Relational.Query ( Relation, Update, relationalQuery, relation, query, wheres, value, (!), (.=.)
-                                 , typedUpdate, updateTarget, (<-#)
-                                 )
 import Database.Relational.Query.MySQL (selectLastInsertId)
 import Model.Table.User     (User (..), UserNoId (..))
 import qualified Model.Table.User as User
@@ -135,7 +132,6 @@ instance YesodRelational App where
     type YesodRelationalConnection App = Connection
     -- runRelational :: YesodRelationalMonad site a -> HandlerT site IO a
     runRelational action = do
-        master <- getYesod
         con <- liftIO connectDB
         runReaderT action con
 

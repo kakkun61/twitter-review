@@ -1,11 +1,8 @@
 module Handler.Account (getAccountR) where
 
 import Import hiding (on)
--- import qualified Database.Esqueleto as E
-import Yesod.Core.Handler (notFound)
 import qualified Data.Set as S
 import Database.Relational.Query (on)
-import qualified Model.Table.User as User
 import qualified Model.Table.Account as Account
 import qualified Model.Table.Tweet as Tweet
 import qualified Model.Table.TweetCandidate as TweetCandidate
