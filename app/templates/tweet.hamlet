@@ -1,10 +1,10 @@
-<h1>@#{accountScreenName account}
+<h1>@#{Account.screenName account}
 <h2>Tweet List
 <div>
   <dl>
     <dt>user id
-    <dd>#{fromMaybe "" $ userDisplayName tweetUser}
+    <dd>#{fromMaybe "" $ User.displayName tweetUser}
     <dt>status
-    <dd>#{tweetStatus tweet}
+    <dd>#{Tweet.status tweet}
     <dt>time
-    <dd>#{formatRFC1123 $ tweetCreated tweet}
+    <dd>#{show $ Tweet.created tweet}
