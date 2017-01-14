@@ -23,8 +23,8 @@ accountSettingWidget account = do
     let screenName = Account.screenName account
     $(widgetFile "account-setting")
 
--- newtype TweetFormData = TweetFormData { tweetFormText :: Text }
---     deriving Show
---
--- tweetForm :: Html -> MForm Handler (FormResult TweetFormData, Widget)
--- tweetForm = renderDivs $ TweetFormData <$> areq textField "Tweet" Nothing
+newtype TweetFormData = TweetFormData { tweetFormText :: Text }
+    deriving Show
+
+tweetForm :: Html -> MForm Handler (FormResult TweetFormData, Widget)
+tweetForm = renderDivs $ TweetFormData <$> areq textField "Tweet" Nothing

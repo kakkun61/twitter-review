@@ -6,5 +6,13 @@ import Prelude (String, Maybe)
 import Database.HDBC.Query.TH
 import Database.Relational.Query
 import DataSource (defineTable)
+import Data.Time.LocalTime
+import Data.Int
 
 $(defineTable "tweet")
+
+data TweetNoId = TweetNoId { tweetNoIdAccountId :: !Int64, tweetNoIdUserId :: !Int64, tweetNoIdStatus :: !String, tweetNoIdCreated :: !LocalTime }
+$(makeRecordPersistableDefault ''TweetNoId)
+
+insertTweetNoId :: Insert TweetNoId
+insertTweetNoId = typedInsert tableOfTweet (TweetNoId |$| accountId' |*| userId' |*| status' |*| created')
