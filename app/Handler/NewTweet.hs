@@ -2,6 +2,7 @@ module Handler.NewTweet where
 
 import Import
 import Data.Time.LocalTime
+import Data.Convertible
 import Database.HDBC (commit)
 import qualified Model.Table.User as User
 import Model.Table.Account (Account(..))
@@ -36,7 +37,7 @@ postNewTweetR accountIdParam = do
                 case accounts of
                     [Account accountId _ _ _] -> do
                         tweetId <- fromIntegral <$> runInsert Tweet.insertTweetNoId (TweetNoId accountId (User.id user) (show Open) nowLt)
-                        void $ runInsert TweetCandidate.insertTweetCandidateNoId $ TweetCandidateNoId tweetId (show text) (User.id user) nowLt
+                        void $ runInsert TweetCandidate.insertTweetCandidateNoId $ TweetCandidateNoId tweetId (convert text) (User.id user) nowLt
                         run commit
                         return tweetId
                     _ -> error "unexpected"
