@@ -11,8 +11,6 @@ import qualified Data.CaseInsensitive as CI
 import qualified Data.Text.Encoding as TE
 import Database.HDBC        (commit)
 import Database.HDBC.MySQL  (Connection)
-import Database.Relational.Query.MySQL (selectLastInsertId)
-import Model.Table.User     (User (..), UserNoId (..))
 import qualified Model.Table.User as User
 
 -- | The foundation datatype for your application. This can be a good place to

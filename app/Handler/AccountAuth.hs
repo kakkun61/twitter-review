@@ -10,9 +10,7 @@ import Text.Read
 import Data.Maybe
 import Web.Authenticate.OAuth   hiding (insert)
 import Database.HDBC (IConnection, commit)
-import Model.Table.Account (Account (..))
 import qualified Model.Table.Account as Account
-import Model.Table.UserAccountRelation (UserAccountRelationNoId (..))
 import qualified Model.Table.UserAccountRelation as UserAccountRelation
 
 mkOAuth :: App -> OAuth

@@ -3,13 +3,9 @@ module Handler.NewTweet where
 import Import
 import Data.Time.LocalTime
 import Database.HDBC (commit)
-import Database.Relational.Query.MySQL
 import qualified Model.Table.User as User
-import Model.Table.Account (Account(..))
 import qualified Model.Table.Account as Account
-import Model.Table.Tweet (TweetNoId(..))
 import qualified Model.Table.Tweet as Tweet
-import Model.Table.TweetCandidate (TweetCandidateNoId(..))
 import qualified Model.Table.TweetCandidate as TweetCandidate
 
 getNewTweetR :: AccountIdParam -> Handler Html

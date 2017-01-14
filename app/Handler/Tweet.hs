@@ -4,11 +4,8 @@ module Handler.Tweet
  ) where
 
 import Import
-import Model.Table.Account (Account(..))
 import qualified Model.Table.Account as Account
-import Model.Table.Tweet (Tweet(..))
 import qualified Model.Table.Tweet as Tweet
-import Model.Table.User (User(..))
 import qualified Model.Table.User as User
 
 getTweetR :: AccountIdParam -> TweetIdParam -> Handler Html
