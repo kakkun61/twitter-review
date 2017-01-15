@@ -3,23 +3,23 @@
 <div #new-tweet>
   <a .btn .btn-primary role=button href=@{NewTweetR accountIdParam}>Create new tweet
 <div #tweet-status .btn-group role=group>
-  $if S.member POpen statusParams
-    <a .btn .btn-default .btn-sm .active role=button href=@?{(AccountR accountIdParam, [("status", toParam $ S.delete POpen statusParams)])}>
+  $if Set.member POpen statusParams
+    <a .btn .btn-default .btn-sm .active role=button href=@?{(AccountR accountIdParam, [("status", toParam $ Set.delete POpen statusParams)])}>
       Open
   $else
-    <a .btn .btn-default .btn-sm         role=button href=@?{(AccountR accountIdParam, [("status", toParam $ S.insert POpen statusParams)])}>
+    <a .btn .btn-default .btn-sm         role=button href=@?{(AccountR accountIdParam, [("status", toParam $ Set.insert POpen statusParams)])}>
       Open
-  $if S.member PTweeted statusParams
-    <a .btn .btn-default .btn-sm .active role=button href=@?{(AccountR accountIdParam, [("status", toParam $ S.delete PTweeted statusParams)])}>
+  $if Set.member PTweeted statusParams
+    <a .btn .btn-default .btn-sm .active role=button href=@?{(AccountR accountIdParam, [("status", toParam $ Set.delete PTweeted statusParams)])}>
       Tweeted
   $else
-    <a .btn .btn-default .btn-sm         role=button href=@?{(AccountR accountIdParam, [("status", toParam $ S.insert PTweeted statusParams)])}>
+    <a .btn .btn-default .btn-sm         role=button href=@?{(AccountR accountIdParam, [("status", toParam $ Set.insert PTweeted statusParams)])}>
       Tweeted
-  $if S.member PClosed statusParams
-    <a .btn .btn-default .btn-sm .active role=button href=@?{(AccountR accountIdParam, [("status", toParam $ S.delete PClosed statusParams)])}>
+  $if Set.member PClosed statusParams
+    <a .btn .btn-default .btn-sm .active role=button href=@?{(AccountR accountIdParam, [("status", toParam $ Set.delete PClosed statusParams)])}>
       Closed
   $else
-    <a .btn .btn-default .btn-sm         role=button href=@?{(AccountR accountIdParam, [("status", toParam $ S.insert PClosed statusParams)])}>
+    <a .btn .btn-default .btn-sm         role=button href=@?{(AccountR accountIdParam, [("status", toParam $ Set.insert PClosed statusParams)])}>
       Closed
 <div>
   $forall (tw, twc) <- rows
