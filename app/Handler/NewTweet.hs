@@ -7,6 +7,7 @@ import qualified Model.Table.User as User
 import qualified Model.Table.Account as Account
 import qualified Model.Table.Tweet as Tweet
 import qualified Model.Table.TweetCandidate as TweetCandidate
+import qualified Model.Tweet as Tweet
 
 getNewTweetR :: AccountIdParam -> Handler Html
 getNewTweetR accountIdParam = do
@@ -32,7 +33,7 @@ postNewTweetR accountIdParam = do
                                 return a
                 case accounts of
                     [Account accountId _ _ _] -> do
-                        void $ runInsert Tweet.insertTweetNoId (TweetNoId accountId (User.id user) (show Open) nowLt)
+                        void $ Tweet.insert accountId (User.id user) Open nowUtc
                         [tweetId] <- runQuery selectLastInsertId ()
                         void $ runInsert TweetCandidate.insertTweetCandidateNoId $ TweetCandidateNoId tweetId (convert text) (User.id user) nowLt
                         run commit

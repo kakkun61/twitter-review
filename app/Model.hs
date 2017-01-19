@@ -5,6 +5,8 @@ module Model where
 import ClassyPrelude.Yesod
 import Data.Text (splitOn)
 import qualified Data.Set as S
+import Data.Int
+import Text.Blaze
 
 type AccountIdParam = Int64
 type TweetIdParam = Int64
@@ -26,3 +28,9 @@ class Param a where
 instance (Param a, Ord a) => Param (Set a) where
     toParam = mconcat . intersperse "|" . map toParam . S.toList
     fromParam = Just . S.fromList . mapMaybe fromParam . splitOn "|"
+
+instance ToMarkup Int8 where
+    toMarkup v = toMarkup (fromIntegral v :: Int)
+
+class ToTableValue a b where
+    toTableValue :: a -> b

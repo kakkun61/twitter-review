@@ -11,7 +11,7 @@ import Data.Int
 
 $(defineTable "tweet")
 
-data TweetNoId = TweetNoId { tweetNoIdAccountId :: !Int64, tweetNoIdUserId :: !Int64, tweetNoIdStatus :: !String, tweetNoIdCreated :: !LocalTime }
+data TweetNoId = TweetNoId { tweetNoIdAccountId :: !Int64, tweetNoIdUserId :: !Int64, tweetNoIdStatus :: !Int8, tweetNoIdCreated :: !LocalTime }
 $(makeRecordPersistableDefault ''TweetNoId)
 
 insertTweetNoId :: Insert TweetNoId

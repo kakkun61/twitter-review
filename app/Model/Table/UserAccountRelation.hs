@@ -9,7 +9,7 @@ import DataSource (defineTable)
 
 $(defineTable "user_account_relation")
 
-data UserAccountRelationNoId = UserAccountRelationNoId { userAccountRelationNoIdUserId :: !Int64, userAccountRelationNoIdAccountId :: !Int64, userAccountRelationNoIdPermission :: !Int32 }
+data UserAccountRelationNoId = UserAccountRelationNoId { userAccountRelationNoIdUserId :: !Int64, userAccountRelationNoIdAccountId :: !Int64, userAccountRelationNoIdPermission :: !Int8 }
 $(makeRecordPersistableDefault ''UserAccountRelationNoId)
 
 insertUserAccountRelationNoId :: Insert UserAccountRelationNoId
