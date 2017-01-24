@@ -32,7 +32,7 @@ postNewTweetR accountIdParam = do
                                 return a
                 case accounts of
                     [Account accountId _ _ _] -> do
-                        void $ runInsert Tweet.insertTweetNoId (TweetNoId accountId (User.id user) (show Open) nowLt)
+                        void $ runInsert Tweet.insertTweetNoId (TweetNoId accountId (User.id user) (convert Open) nowLt)
                         [tweetId] <- runQuery selectLastInsertId ()
                         void $ runInsert TweetCandidate.insertTweetCandidateNoId $ TweetCandidateNoId tweetId (convert text) (User.id user) nowLt
                         run commit

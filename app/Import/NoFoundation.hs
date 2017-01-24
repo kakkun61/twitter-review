@@ -20,6 +20,7 @@ import Database.Relational.Query             as Import ( Relation, Update, relat
                                                        )
 import Database.Relational.Query.Projectable as Import ((|$|), (|*|))
 import Database.Relational.Query.MySQL       as Import (selectLastInsertId)
+import Data.Int
 import Model.Table.Account                   as Import (Account(Account))
 import Model.Table.Tweet                     as Import (Tweet(Tweet), TweetNoId(TweetNoId))
 import Model.Table.TweetCandidate            as Import (TweetCandidate(TweetCandidate), TweetCandidateNoId(TweetCandidateNoId))
