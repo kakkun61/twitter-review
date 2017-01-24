@@ -1,4 +1,6 @@
-<h1>@#{Account.screenName account}
+<h1>
+  <a href=@{AccountR $ Account.id account}>
+    @#{Account.screenName account}
 <h2>Tweet List
 <div>
   <dl>
