@@ -1,0 +1,52 @@
+[Account]
+-
+Create new tweet
+    ==> New Tweet
+Each tweet
+    ==> Tweet
+Change status (Open, Tweeted, Closed)
+    ==> Account
+Setting
+    ==> Account Setting
+
+[Account Setting]
+-
+Delete Account
+    ==> Home (Logined)
+
+[Home (Logined)]
+-
+Logout
+    ==> Master Login
+Add new Twitter account
+    ==> New Account
+Each account
+    ==> Account
+
+[Master Login]
+-
+Sign in with Google
+    ={Google OAuth}=> previous page
+
+[New Account]
+-
+Sign in with Twitter
+    ={Twitter OAuth}=> Account
+
+[New Tweet]
+Tweet input
+-
+Create
+    ==> Tweet
+
+[Tweet]
+Tweet Candidates
+Comments
+Text input
+-
+Comment
+    ==> Tweet
+Tweet text
+    ==> Tweet
+Tweet
+    ==> Tweet
