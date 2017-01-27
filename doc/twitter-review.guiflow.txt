@@ -8,6 +8,8 @@ Change status (Open, Tweeted, Closed)
     ==> Account
 Setting
     ==> Account Setting
+Twitter link
+    ==> Twitter
 
 [Account Setting]
 -
