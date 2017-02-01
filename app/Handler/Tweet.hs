@@ -3,30 +3,31 @@ module Handler.Tweet
  , postTweetR
  ) where
 
-import Import
+import Import hiding (on)
+import Database.Relational.Query (on)
 import qualified Model.Table.Account as Account
 import qualified Model.Table.Tweet as Tweet
 import qualified Model.Table.User as User
 
 getTweetR :: AccountIdParam -> TweetIdParam -> Handler Html
-getTweetR accountIdParam tweetIdParam = runRelational $ do
-    user <- lift requireAuth
-    accounts <- runQuery Account.selectAccount accountIdParam
-    case accounts of
-        [account@(Account _ _ _ _)] -> do
-            tweets <- runQuery Tweet.selectTweet tweetIdParam
-            case tweets of
-                [tweet@(Tweet _ _ tweetUserId _ _)] -> do
-                    tweetUsers <- runQuery User.selectUser tweetUserId
-                    case tweetUsers of
-                        [tweetUser@(User _ _ _ _)] -> do
-                            form <- lift $ generateFormPost commentForm
-                            lift $ defaultLayout $ do
-                                headerWidget $ Just user
-                                tweetWidget account user tweet form
-                        _ -> lift notFound
-                _ -> lift notFound
-        _ -> lift notFound
+getTweetR accountIdParam tweetIdParam = do
+    user <- requireAuth
+    p <- runRelational $ do
+             accounts <- runQuery Account.selectAccount accountIdParam
+             ts <- flip runQuery () $ relationalQuery $ relation $ do
+                       t <- query Tweet.tweet
+                       u <- query User.user
+                       on $ t ! Tweet.userId' .=. u ! User.id'
+                       wheres $ t ! Tweet.id' .=. value tweetIdParam
+                       return $ (,) |$| t |*| u
+             return (accounts, ts)
+    case p of
+        ([account@(Account _ _ _ _)], [(tweet@(Tweet _ _ _ _ _), tweetUser@(User _ _ _ _))]) -> do
+            form <- generateFormPost commentForm
+            defaultLayout $ do
+                headerWidget $ Just user
+                tweetWidget account user tweet form
+        _ -> notFound
 
 postTweetR :: AccountIdParam -> TweetIdParam -> Handler Html
 postTweetR _accountIdParam _tweetIdParam = error "not yet implemented"
