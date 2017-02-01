@@ -10,3 +10,6 @@
     <dd>#{Tweet.status tweet}
     <dt>time
     <dd>#{show $ Tweet.created tweet}
+<form method=post action=@{TweetR (Account.id account) (Tweet.id tweet)} enctype=#{commentFormEnctype}>
+    ^{commentFormWidget}
+    <button>Comment

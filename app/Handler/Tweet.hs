@@ -20,12 +20,26 @@ getTweetR accountIdParam tweetIdParam = runRelational $ do
                     tweetUsers <- runQuery User.selectUser tweetUserId
                     case tweetUsers of
                         [tweetUser@(User _ _ _ _)] -> do
+                            form <- lift $ generateFormPost commentForm
                             lift $ defaultLayout $ do
                                 headerWidget $ Just user
-                                $(widgetFile "tweet")
+                                tweetWidget account user tweet form
                         _ -> lift notFound
                 _ -> lift notFound
         _ -> lift notFound
 
 postTweetR :: AccountIdParam -> TweetIdParam -> Handler Html
 postTweetR _accountIdParam _tweetIdParam = error "not yet implemented"
+
+
+newtype TweetFormData = TweetFormData { tweetFormText :: Text }
+    deriving Show
+
+tweetForm :: Html -> MForm Handler (FormResult TweetFormData, Widget)
+tweetForm = renderDivs $ TweetFormData <$> areq textField "Tweet" Nothing
+
+newtype CommentFormData = CommentFormData { commentFormText :: Text }
+    deriving Show
+
+commentForm :: Html -> MForm Handler (FormResult CommentFormData, Widget)
+commentForm = renderDivs $ CommentFormData <$> areq textField "Comment" Nothing

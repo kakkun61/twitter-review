@@ -34,3 +34,7 @@ accountWidget :: Account -> [(Tweet, TweetCandidate)] -> Set StatusParam -> Widg
 accountWidget account rows statusParams = do
     let accountIdParam = Account.id account
     $(widgetFile "account")
+
+tweetWidget :: Account -> User -> Tweet -> (Widget, Enctype) -> Widget
+tweetWidget account tweetUser tweet (commentFormWidget, commentFormEnctype) = do
+    $(widgetFile "tweet")
