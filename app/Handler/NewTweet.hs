@@ -46,3 +46,9 @@ postNewTweetR accountIdParam = do
         FormMissing -> defaultLayout $ do
             headerWidget $ Just user
             $(widgetFile "new-tweet")
+
+newtype TweetFormData = TweetFormData { tweetFormText :: Text }
+    deriving Show
+
+tweetForm :: Html -> MForm Handler (FormResult TweetFormData, Widget)
+tweetForm = renderDivs $ TweetFormData <$> areq textField "Tweet" Nothing

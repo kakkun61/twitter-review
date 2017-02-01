@@ -34,9 +34,3 @@ accountWidget :: Account -> [(Tweet, TweetCandidate)] -> Set StatusParam -> Widg
 accountWidget account rows statusParams = do
     let accountIdParam = Account.id account
     $(widgetFile "account")
-
-newtype TweetFormData = TweetFormData { tweetFormText :: Text }
-    deriving Show
-
-tweetForm :: Html -> MForm Handler (FormResult TweetFormData, Widget)
-tweetForm = renderDivs $ TweetFormData <$> areq textField "Tweet" Nothing
