@@ -4,7 +4,10 @@ module Handler.Tweet
  ) where
 
 import Import
+import Data.Time.LocalTime
+import Database.HDBC (commit)
 import qualified Model.Table.Account as Account
+import qualified Model.Table.Comment as Comment
 import qualified Model.Table.Tweet as Tweet
 import qualified Model.Table.User as User
 
@@ -29,7 +32,40 @@ getTweetR accountIdParam tweetIdParam = runRelational $ do
         _ -> lift notFound
 
 postTweetR :: AccountIdParam -> TweetIdParam -> Handler Html
-postTweetR _accountIdParam _tweetIdParam = error "not yet implemented"
+postTweetR accountIdParam tweetIdParam = runRelational $ do
+    user <- lift requireAuth
+    nowUtc <- liftIO getCurrentTime
+    let nowLt = utcToLocalTime utc nowUtc
+    accounts <- runQuery Account.selectAccount accountIdParam
+    case accounts of
+        [account@(Account _ _ _ _)] -> do
+            tweets <- runQuery Tweet.selectTweet tweetIdParam
+            case tweets of
+                [tweet@(Tweet _ _ tweetUserId _ _)] -> do
+                    tweetUsers <- runQuery User.selectUser tweetUserId
+                    case tweetUsers of
+                        [tweetUser@(User _ _ _ _)] -> do
+                            form <- lift $ generateFormPost commentForm
+                            ((result, widget), enctype) <- lift $ runFormPost commentForm
+                            case result of
+                                FormSuccess commentFormData -> do
+                                    void $ runInsert Comment.insertCommentNoId (CommentNoId (Tweet.id tweet) (convert $ commentFormText commentFormData) (User.id user) nowLt)
+                                    run commit
+                                    lift $ defaultLayout $ do
+                                        headerWidget $ Just user
+                                        tweetWidget account user tweet form
+                                FormFailure err -> do
+                                    $(logDebug) $ unlines err
+                                    lift $ defaultLayout $ do
+                                        headerWidget $ Just user
+                                        tweetWidget account user tweet form
+                                FormMissing -> do
+                                    lift $ defaultLayout $ do
+                                        headerWidget $ Just user
+                                        tweetWidget account user tweet form
+                        _ -> lift notFound
+                _ -> lift notFound
+        _ -> lift notFound
 
 
 newtype TweetFormData = TweetFormData { tweetFormText :: Text }

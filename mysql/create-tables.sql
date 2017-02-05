@@ -56,7 +56,7 @@ CREATE TABLE `tweet_uri` (
 CREATE TABLE `tweet_candidate` (
   `id`       BIGINT UNSIGNED   NOT NULL AUTO_INCREMENT,
   `tweet_id` BIGINT UNSIGNED   NOT NULL,
-  `TEXT`     TEXT              NOT NULL,
+  `text`     TEXT              NOT NULL,
   `user_id`  BIGINT UNSIGNED   NOT NULL,
   `created`  DATETIME          NOT NULL,
   PRIMARY KEY (`id`),
@@ -68,10 +68,10 @@ CREATE TABLE `tweet_candidate` (
 CREATE TABLE `comment` (
   `id`       BIGINT UNSIGNED   NOT NULL AUTO_INCREMENT,
   `tweet_id` BIGINT UNSIGNED   NOT NULL,
-  `TEXT`     TEXT              NOT NULL,
-  `user`     BIGINT UNSIGNED   NOT NULL,
+  `text`     TEXT              NOT NULL,
+  `user_id`  BIGINT UNSIGNED   NOT NULL,
   `created`  DATETIME          NOT NULL,
   PRIMARY KEY (`id`),
   KEY `comment_tweet_id_fkey` (`tweet_id`),
-  CONSTRAINT `comment_user_fkey` FOREIGN KEY (`user`) REFERENCES `user` (`id`)
+  CONSTRAINT `comment_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin

@@ -22,6 +22,7 @@ library
                      Model.Permission
                      Model.Table.User
                      Model.Table.Account
+                     Model.Table.Comment
                      Model.Table.UserAccountRelation
                      Model.Table.Tweet
                      Model.Table.TweetCandidate
