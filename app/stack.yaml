@@ -8,10 +8,7 @@ packages:
 - '.'
 - lib/yesod-relational-record
 - lib/relational-record-mysql
-#- lib/relational-pool
-- location:
-    git: git@github.com:kakkun61/hdbc-mysql.git
-    commit: 354345c3c99b82e42c5339811fab00821385e795
+- lib/hdbc-mysql
 - location:
     git: git@github.com:kakkun61/haskell-relational-record.git
     commit: 5174a5217e5f1b83d2db153e69e6554af721b9ae
