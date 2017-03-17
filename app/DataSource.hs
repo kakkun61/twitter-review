@@ -20,6 +20,17 @@ import Prelude (id)
 
 connectDB :: IO Connection
 connectDB = do
+    let mysqlUnixSocket = ""
+        mysqlGroup = Nothing
+    mysqlHost     <- maybe "" id <$> lookupEnv "TWITTER_REVIEW_DB_PORT_3306_TCP_ADDR"
+    mysqlPort     <- maybe 0 read <$> lookupEnv "TWITTER_REVIEW_DB_PORT_3306_TCP_PORT"
+    mysqlDatabase <- maybe "" id <$> lookupEnv "TWITTER_REVIEW_DB_ENV_MYSQL_DATABASE"
+    mysqlUser     <- maybe "" id <$> lookupEnv "TWITTER_REVIEW_DB_ENV_MYSQL_USER"
+    mysqlPassword <- maybe "" id <$> lookupEnv "TWITTER_REVIEW_DB_ENV_MYSQL_PASSWORD"
+    connectMySQL MySQLConnectInfo { .. }
+
+connectDB' :: IO Connection
+connectDB' = do
     let mysqlUser = "root"
         mysqlDatabase = "INFORMATION_SCHEMA"
         mysqlUnixSocket = ""
@@ -32,7 +43,7 @@ connectDB = do
 defineTable :: String -> Q [Dec]
 defineTable tableName =
     defineTableFromDB'
-        connectDB
+        connectDB'
         (config { identifierQuotation = Quotation '`' })
         driverMySQL
         "twitter-review"
