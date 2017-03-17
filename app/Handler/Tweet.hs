@@ -13,8 +13,8 @@ getTweetR :: AccountIdParam -> TweetIdParam -> Handler Html
 getTweetR accountIdParam tweetIdParam = do
     user <- requireAuth
     p <- runRelational $ do
-             accounts <- runQuery Account.selectAccount accountIdParam
-             ts <- flip runQuery () $ relationalQuery $ relation $ do
+             accounts <- runQuery' Account.selectAccount accountIdParam
+             ts <- flip runQuery' () $ relationalQuery $ relation $ do
                        t <- query Tweet.tweet
                        u <- query User.user
                        on $ t ! Tweet.userId' .=. u ! User.id'
