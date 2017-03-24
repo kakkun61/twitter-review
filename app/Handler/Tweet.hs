@@ -25,7 +25,7 @@ getTweetR accountIdParam tweetIdParam = do
                        return $ (,) |$| t |*| u
              return (accounts, ts)
     case p of
-        ([account@(Account _ _ _ _)], [(tweet@(Tweet _ _ _ _ _), tweetUser@(User _ _ _ _))]) -> do
+        ([account], [(tweet, tweetUser)]) -> do
             form <- generateFormPost commentForm
             defaultLayout $ do
                 headerWidget $ Just user
