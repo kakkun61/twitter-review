@@ -33,41 +33,36 @@ getTweetR accountIdParam tweetIdParam = do
         _ -> notFound
 
 postTweetR :: AccountIdParam -> TweetIdParam -> Handler Html
-postTweetR accountIdParam tweetIdParam = runRelational $ do
-    user <- lift requireAuth
+postTweetR accountIdParam tweetIdParam = do
+    user <- requireAuth
     nowUtc <- liftIO getCurrentTime
     let nowLt = utcToLocalTime utc nowUtc
-    accounts <- runQuery Account.selectAccount accountIdParam
-    case accounts of
-        [account@(Account _ _ _ _)] -> do
-            tweets <- runQuery Tweet.selectTweet tweetIdParam
-            case tweets of
-                [tweet@(Tweet _ _ tweetUserId _ _)] -> do
-                    tweetUsers <- runQuery User.selectUser tweetUserId
-                    case tweetUsers of
-                        [tweetUser@(User _ _ _ _)] -> do
-                            form <- lift $ generateFormPost commentForm
-                            ((result, widget), enctype) <- lift $ runFormPost commentForm
-                            case result of
-                                FormSuccess commentFormData -> do
-                                    void $ runInsert Comment.insertCommentNoId (CommentNoId (Tweet.id tweet) (convert $ commentFormText commentFormData) (User.id user) nowLt)
-                                    run commit
-                                    lift $ defaultLayout $ do
-                                        headerWidget $ Just user
-                                        tweetWidget account user tweet form
-                                FormFailure err -> do
-                                    $(logDebug) $ unlines err
-                                    lift $ defaultLayout $ do
-                                        headerWidget $ Just user
-                                        tweetWidget account user tweet form
-                                FormMissing -> do
-                                    lift $ defaultLayout $ do
-                                        headerWidget $ Just user
-                                        tweetWidget account user tweet form
-                        _ -> lift notFound
-                _ -> lift notFound
-        _ -> lift notFound
-
+    p <- runRelational $ do
+             accounts <- runQuery' Account.selectAccount accountIdParam
+             tweets <- runQuery' Tweet.selectTweet tweetIdParam
+             return (accounts, tweets)
+    case p of
+        ([account], [tweet]) -> do
+            form <- generateFormPost commentForm
+            ((result, widget), enctype) <- runFormPost commentForm
+            case result of
+                FormSuccess commentFormData -> do
+                    void $ runRelational $ do
+                        void $ runInsert Comment.insertCommentNoId (CommentNoId (Tweet.id tweet) (convert $ commentFormText commentFormData) (User.id user) nowLt)
+                        run commit
+                    defaultLayout $ do
+                        headerWidget $ Just user
+                        tweetWidget account user tweet form
+                FormFailure err -> do
+                    $(logDebug) $ unlines err
+                    defaultLayout $ do
+                        headerWidget $ Just user
+                        tweetWidget account user tweet form
+                FormMissing -> do
+                    defaultLayout $ do
+                        headerWidget $ Just user
+                        tweetWidget account user tweet form
+        _ -> notFound
 
 newtype TweetFormData = TweetFormData { tweetFormText :: Text }
     deriving Show
