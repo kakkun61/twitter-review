@@ -1,15 +1,15 @@
 <h1>
-  <a href=@{AccountR $ Account.id account}>
-    @#{Account.screenName account}
+    <a href=@{AccountR $ Account.id account}>
+        @#{Account.screenName account}
 <h2>Tweet List
 <div>
-  <dl>
-    <dt>user id
-    <dd>#{fromMaybe "" $ User.displayName tweetUser}
-    <dt>status
-    <dd>#{Tweet.status tweet}
-    <dt>time
-    <dd>#{show $ Tweet.created tweet}
+    <dl>
+        <dt>user id
+        <dd>#{fromMaybe "" $ User.displayName tweetUser}
+        <dt>status
+        <dd>#{Tweet.status tweet}
+        <dt>time
+        <dd>#{show $ Tweet.created tweet}
 <form method=post action=@{TweetR (Account.id account) (Tweet.id tweet)} enctype=#{commentFormEnctype}>
-    ^{commentFormWidget}
-    <button>Comment
+        ^{commentFormWidget}
+        <button>Comment
