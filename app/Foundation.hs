@@ -209,16 +209,10 @@ instance YesodAuthRelational App where
     type AuthModel App = User
 
     getAuthModel ident = do
-        us <- runRelational $ runQuery (relationalQuery go) ()
+        us <- runRelational $ runQuery User.selectUser ident
         case us of
             [] -> return Nothing
             u : _ -> return $ Just u
-        where
-            go :: Relation () (User)
-            go = relation $ do
-                u <- query User.user
-                wheres $ u ! User.id' .=. value ident
-                return u
 
 -- This instance is required to use forms. You can modify renderMessage to
 -- achieve customized and internationalized form validation messages.
