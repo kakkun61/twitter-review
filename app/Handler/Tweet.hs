@@ -23,13 +23,20 @@ getTweetR accountIdParam tweetIdParam = do
                        on $ t ! Tweet.userId' .=. u ! User.id'
                        wheres $ t ! Tweet.id' .=. value tweetIdParam
                        return $ (,) |$| t |*| u
-             return (accounts, ts)
+             comments <- case ts of
+                           [(tweet, _)] ->
+                               flip runQuery' () $ relationalQuery $ relation $ do
+                                   c <- query Comment.comment
+                                   wheres $ c ! Comment.tweetId' .=. value (Tweet.id tweet)
+                                   return c
+                           _ -> return []
+             return (accounts, ts, comments)
     case p of
-        ([account], [(tweet, tweetUser)]) -> do
+        ([account], [(tweet, tweetUser)], comments) -> do
             form <- generateFormPost commentForm
             defaultLayout $ do
                 headerWidget $ Just user
-                tweetWidget account user tweet form
+                tweetWidget account user tweet comments form
         _ -> notFound
 
 postTweetR :: AccountIdParam -> TweetIdParam -> Handler Html
@@ -52,16 +59,16 @@ postTweetR accountIdParam tweetIdParam = do
                         run commit
                     defaultLayout $ do
                         headerWidget $ Just user
-                        tweetWidget account user tweet form
+                        tweetWidget account user tweet [] form
                 FormFailure err -> do
                     $(logDebug) $ unlines err
                     defaultLayout $ do
                         headerWidget $ Just user
-                        tweetWidget account user tweet form
+                        tweetWidget account user tweet [] form
                 FormMissing -> do
                     defaultLayout $ do
                         headerWidget $ Just user
-                        tweetWidget account user tweet form
+                        tweetWidget account user tweet [] form
         _ -> notFound
 
 newtype TweetFormData = TweetFormData { tweetFormText :: Text }

@@ -10,6 +10,19 @@
         <dd>#{Tweet.status tweet}
         <dt>time
         <dd>#{show $ Tweet.created tweet}
+<ul>
+    $forall comment <- comments
+        <dl>
+            <dt>id
+            <dd>#{Comment.id comment}
+            <dt>tweet id
+            <dd>#{Comment.tweetId comment}
+            <dt>text
+            <dd>#{Comment.text comment}
+            <dt>user id
+            <dd>#{Comment.userId comment}
+            <dt>created
+            <dd>#{show $ Comment.created comment}
 <form method=post action=@{TweetR (Account.id account) (Tweet.id tweet)} enctype=#{commentFormEnctype}>
         ^{commentFormWidget}
         <button>Comment

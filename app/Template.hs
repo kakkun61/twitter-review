@@ -15,6 +15,8 @@ import Model.Table.TweetCandidate (TweetCandidate)
 import qualified Model.Table.TweetCandidate as TweetCandidate
 import Model.Table.User (User)
 import qualified Model.Table.User as User
+import Model.Table.Comment (Comment)
+import qualified Model.Table.Comment as Comment
 import Model.Parameter.Status
 
 headerWidget :: Maybe User -> Widget
@@ -35,6 +37,9 @@ accountWidget account rows statusParams = do
     let accountIdParam = Account.id account
     $(widgetFile "account")
 
-tweetWidget :: Account -> User -> Tweet -> (Widget, Enctype) -> Widget
-tweetWidget account tweetUser tweet (commentFormWidget, commentFormEnctype) = do
+tweetWidget :: Account -> User -> Tweet -> [Comment] -> (Widget, Enctype) -> Widget
+tweetWidget account tweetUser tweet comments (commentFormWidget, commentFormEnctype) = do
+    $(logDebug) $ "tweet.userId: " <> (pack $ show $ Tweet.userId tweet)
+    $(logDebug) $ "tweetUser.id: " <> (pack $ show  $ User.id tweetUser)
+    $(logDebug) $ "tweetUser.displayName: " <> (pack $ User.email tweetUser)
     $(widgetFile "tweet")
