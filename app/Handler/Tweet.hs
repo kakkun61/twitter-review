@@ -19,43 +19,37 @@ postTweetR :: AccountIdParam -> TweetIdParam -> Handler Html
 postTweetR = tweetR POST
 
 tweetR :: StdMethod -> AccountIdParam -> TweetIdParam -> Handler Html
-tweetR method accountIdParam tweetIdParam = do
-    user <- requireAuth
+tweetR method accountIdParam tweetIdParam = runRelational $ do
+    user <- lift requireAuth
     nowUtc <- liftIO getCurrentTime
     let nowLt = utcToLocalTime utc nowUtc
-    p <- runRelational $ do
-             accounts <- runQuery' Account.selectAccount accountIdParam
-             ts <- flip runQuery' () $ relationalQuery $ relation $ do
-                       t <- query Tweet.tweet
-                       u <- query User.user
-                       on $ t ! Tweet.userId' .=. u ! User.id'
-                       wheres $ t ! Tweet.id' .=. value tweetIdParam
-                       return $ (,) |$| t |*| u
-             comments <- case ts of
-                           [(tweet, _)] ->
-                               flip runQuery' () $ relationalQuery $ relation $ do
-                                   c <- query Comment.comment
-                                   wheres $ c ! Comment.tweetId' .=. value (Tweet.id tweet)
-                                   return c
-                           _ -> return []
-             return (accounts, ts, comments)
-    case p of
-        ([account], [(tweet, tweetUser)], comments) -> do
+    accounts <- runQuery' Account.selectAccount accountIdParam
+    ts <- flip runQuery' () $ relationalQuery $ relation $ do
+              t <- query Tweet.tweet
+              u <- query User.user
+              on $ t ! Tweet.userId' .=. u ! User.id'
+              wheres $ t ! Tweet.id' .=. value tweetIdParam
+              return $ (,) |$| t |*| u
+    case (accounts, ts) of
+        ([account], [(tweet, tweetUser)]) -> do
             when (method == POST) $ treatPostedForm tweet user nowLt
-            form <- generateFormPost commentForm
-            defaultLayout $ do
+            comments <- flip runQuery' () $ relationalQuery $ relation $ do
+                            c <- query Comment.comment
+                            wheres $ c ! Comment.tweetId' .=. value (Tweet.id tweet)
+                            return c
+            form <- lift $ generateFormPost commentForm
+            lift $ defaultLayout $ do
                 headerWidget $ Just user
                 tweetWidget account tweetUser tweet comments form
-        _ -> notFound
+        _ -> lift $ notFound
     where
-        treatPostedForm :: Tweet -> User -> LocalTime -> Handler ()
+        treatPostedForm :: Tweet -> User -> LocalTime -> YesodRelationalMonad App ()
         treatPostedForm tweet user now = do
-            ((result, widget), enctype) <- runFormPost commentForm
+            ((result, widget), enctype) <- lift $ runFormPost commentForm
             case result of
                 FormSuccess commentFormData -> do
-                    void $ runRelational $ do
-                        void $ runInsert Comment.insertCommentNoId (CommentNoId (Tweet.id tweet) (convert $ commentFormText commentFormData) (User.id user) now)
-                        run commit
+                    void $ runInsert Comment.insertCommentNoId (CommentNoId (Tweet.id tweet) (convert $ commentFormText commentFormData) (User.id user) now)
+                    run commit
                 FormFailure err -> do
                     $(logDebug) $ unlines err
                     return ()
