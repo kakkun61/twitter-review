@@ -13,8 +13,16 @@ import qualified Model.Table.Tweet as Tweet
 import qualified Model.Table.User as User
 
 getTweetR :: AccountIdParam -> TweetIdParam -> Handler Html
-getTweetR accountIdParam tweetIdParam = do
+getTweetR = tweetR GET
+
+postTweetR :: AccountIdParam -> TweetIdParam -> Handler Html
+postTweetR = tweetR POST
+
+tweetR :: StdMethod -> AccountIdParam -> TweetIdParam -> Handler Html
+tweetR method accountIdParam tweetIdParam = do
     user <- requireAuth
+    nowUtc <- liftIO getCurrentTime
+    let nowLt = utcToLocalTime utc nowUtc
     p <- runRelational $ do
              accounts <- runQuery' Account.selectAccount accountIdParam
              ts <- flip runQuery' () $ relationalQuery $ relation $ do
@@ -33,43 +41,26 @@ getTweetR accountIdParam tweetIdParam = do
              return (accounts, ts, comments)
     case p of
         ([account], [(tweet, tweetUser)], comments) -> do
+            when (method == POST) $ treatPostedForm tweet user nowLt
             form <- generateFormPost commentForm
             defaultLayout $ do
                 headerWidget $ Just user
-                tweetWidget account user tweet comments form
+                tweetWidget account tweetUser tweet comments form
         _ -> notFound
-
-postTweetR :: AccountIdParam -> TweetIdParam -> Handler Html
-postTweetR accountIdParam tweetIdParam = do
-    user <- requireAuth
-    nowUtc <- liftIO getCurrentTime
-    let nowLt = utcToLocalTime utc nowUtc
-    p <- runRelational $ do
-             accounts <- runQuery' Account.selectAccount accountIdParam
-             tweets <- runQuery' Tweet.selectTweet tweetIdParam
-             return (accounts, tweets)
-    case p of
-        ([account], [tweet]) -> do
-            form <- generateFormPost commentForm
+    where
+        treatPostedForm :: Tweet -> User -> LocalTime -> Handler ()
+        treatPostedForm tweet user now = do
             ((result, widget), enctype) <- runFormPost commentForm
             case result of
                 FormSuccess commentFormData -> do
                     void $ runRelational $ do
-                        void $ runInsert Comment.insertCommentNoId (CommentNoId (Tweet.id tweet) (convert $ commentFormText commentFormData) (User.id user) nowLt)
+                        void $ runInsert Comment.insertCommentNoId (CommentNoId (Tweet.id tweet) (convert $ commentFormText commentFormData) (User.id user) now)
                         run commit
-                    defaultLayout $ do
-                        headerWidget $ Just user
-                        tweetWidget account user tweet [] form
                 FormFailure err -> do
                     $(logDebug) $ unlines err
-                    defaultLayout $ do
-                        headerWidget $ Just user
-                        tweetWidget account user tweet [] form
+                    return ()
                 FormMissing -> do
-                    defaultLayout $ do
-                        headerWidget $ Just user
-                        tweetWidget account user tweet [] form
-        _ -> notFound
+                    return ()
 
 newtype TweetFormData = TweetFormData { tweetFormText :: Text }
     deriving Show
