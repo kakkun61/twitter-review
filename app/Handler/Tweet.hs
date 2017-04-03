@@ -43,9 +43,17 @@ tweetR method accountIdParam tweetIdParam = runRelational $ do
                             c <- query Comment.comment
                             wheres $ c ! Comment.tweetId' .=. value (Tweet.id tweet)
                             return c
+            candidates <- flip runQuery' () $ relationalQuery $ relation $ do
+                              c <- query TweetCandidate.tweetCandidate
+                              wheres $ c ! TweetCandidate.tweetId' .=. value (Tweet.id tweet)
+                              return c
+            let ccs = flip sortBy (mix comments candidates) $ \a b ->
+                          let [aTime, bTime] = fmap (either Comment.created TweetCandidate.created) [a, b]
+                          in compare aTime bTime
+            $(logDebug) $ pack $ show ccs
             lift $ defaultLayout $ do
                 headerWidget $ Just user
-                tweetWidget account tweetUser tweet comments tweetWE commentWE
+                tweetWidget account tweetUser tweet ccs tweetWE commentWE
         _ -> lift $ notFound
     where
         treatPostedCommentForm :: Tweet -> User -> LocalTime -> YesodRelationalMonad App (Widget, Enctype)
@@ -73,6 +81,8 @@ tweetR method accountIdParam tweetIdParam = runRelational $ do
                     return ()
                 FormMissing -> return ()
             return (widget, enctype)
+        mix :: (Functor f, Semigroup (f (Either a b))) => f a -> f b -> f (Either a b)
+        mix l r = fmap Left l <> fmap Right r
 
 newtype TweetFormData = TweetFormData { tweetFormText :: Text }
     deriving Show

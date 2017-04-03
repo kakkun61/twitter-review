@@ -11,18 +11,34 @@
         <dt>time
         <dd>#{show $ Tweet.created tweet}
 <ul>
-    $forall comment <- comments
-        <dl>
-            <dt>id
-            <dd>#{Comment.id comment}
-            <dt>tweet id
-            <dd>#{Comment.tweetId comment}
-            <dt>text
-            <dd>#{Comment.text comment}
-            <dt>user id
-            <dd>#{Comment.userId comment}
-            <dt>created
-            <dd>#{show $ Comment.created comment}
+    $forall cc <- ccs
+        $case cc
+            $of Left comment
+                <h3>Comment
+                <dl>
+                    <dt>id
+                    <dd>#{Comment.id comment}
+                    <dt>tweet id
+                    <dd>#{Comment.tweetId comment}
+                    <dt>text
+                    <dd>#{Comment.text comment}
+                    <dt>user id
+                    <dd>#{Comment.userId comment}
+                    <dt>created
+                    <dd>#{show $ Comment.created comment}
+            $of Right candidate
+                <h3>Candidate
+                <dl>
+                    <dt>id
+                    <dd>#{TweetCandidate.id candidate}
+                    <dt>tweet id
+                    <dd>#{TweetCandidate.tweetId candidate}
+                    <dt>text
+                    <dd>#{TweetCandidate.text candidate}
+                    <dt>user id
+                    <dd>#{TweetCandidate.userId candidate}
+                    <dt>created
+                    <dd>#{show $ TweetCandidate.created candidate}
 <form method=post action=@{TweetR (Account.id account) (Tweet.id tweet)} enctype=#{commentFormEnctype}>
         ^{commentFormWidget}
         <button>Comment
