@@ -37,7 +37,7 @@ accountWidget account rows statusParams = do
     let accountIdParam = Account.id account
     $(widgetFile "account")
 
-tweetWidget :: Account -> User -> Tweet -> [Either Comment TweetCandidate] -> (Widget, Enctype) -> (Widget, Enctype) -> Widget
+tweetWidget :: Account -> User -> Tweet -> [Either (Comment, User) (TweetCandidate, User)] -> (Widget, Enctype) -> (Widget, Enctype) -> Widget
 tweetWidget account tweetUser tweet ccs (tweetFormWidget, tweetFormEnctype) (commentFormWidget, commentFormEnctype) = do
     $(logDebug) $ "tweet.userId: " <> (pack $ show $ Tweet.userId tweet)
     $(logDebug) $ "tweetUser.id: " <> (pack $ show  $ User.id tweetUser)

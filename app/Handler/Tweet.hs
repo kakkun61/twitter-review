@@ -41,14 +41,18 @@ tweetR method accountIdParam tweetIdParam = runRelational $ do
                            _ -> lift $ generateFormPost tweetForm
             comments <- flip runQuery' () $ relationalQuery $ relation $ do
                             c <- query Comment.comment
+                            u <- query User.user
                             wheres $ c ! Comment.tweetId' .=. value (Tweet.id tweet)
-                            return c
+                            on $ c ! Comment.userId' .=. u ! User.id'
+                            return $ (,) |$| c |*| u
             candidates <- flip runQuery' () $ relationalQuery $ relation $ do
                               c <- query TweetCandidate.tweetCandidate
+                              u <- query User.user
                               wheres $ c ! TweetCandidate.tweetId' .=. value (Tweet.id tweet)
-                              return c
+                              on $ c ! TweetCandidate.userId' .=. u ! User.id'
+                              return $ (,) |$| c |*| u
             let ccs = flip sortBy (mix comments candidates) $ \a b ->
-                          let [aTime, bTime] = fmap (either Comment.created TweetCandidate.created) [a, b]
+                          let [aTime, bTime] = fmap (either (Comment.created . fst) (TweetCandidate.created . fst)) [a, b]
                           in compare aTime bTime
             $(logDebug) $ pack $ show ccs
             lift $ defaultLayout $ do

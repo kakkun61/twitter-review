@@ -13,7 +13,7 @@
 <ul>
     $forall cc <- ccs
         $case cc
-            $of Left comment
+            $of Left (comment, user)
                 <h3>Comment
                 <dl>
                     <dt>id
@@ -22,11 +22,11 @@
                     <dd>#{Comment.tweetId comment}
                     <dt>text
                     <dd>#{Comment.text comment}
-                    <dt>user id
-                    <dd>#{Comment.userId comment}
+                    <dt>user
+                    <dd>#{fromMaybe "" $ User.displayName user} (#{User.email user})
                     <dt>created
                     <dd>#{show $ Comment.created comment}
-            $of Right candidate
+            $of Right (candidate, user)
                 <h3>Candidate
                 <dl>
                     <dt>id
@@ -35,8 +35,8 @@
                     <dd>#{TweetCandidate.tweetId candidate}
                     <dt>text
                     <dd>#{TweetCandidate.text candidate}
-                    <dt>user id
-                    <dd>#{TweetCandidate.userId candidate}
+                    <dt>user
+                    <dd>#{fromMaybe "" $ User.displayName user} (#{User.email user})
                     <dt>created
                     <dd>#{show $ TweetCandidate.created candidate}
 <form method=post action=@{TweetR (Account.id account) (Tweet.id tweet)} enctype=#{commentFormEnctype}>
