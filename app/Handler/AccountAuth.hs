@@ -13,17 +13,6 @@ import Database.HDBC (IConnection, commit)
 import qualified Model.Table.Account as Account
 import qualified Model.Table.UserAccountRelation as UserAccountRelation
 
-mkOAuth :: App -> OAuth
-mkOAuth master = newOAuth { oauthServerName      = "twitter"
-                          , oauthRequestUri      = "https://api.twitter.com/oauth/request_token"
-                          , oauthAccessTokenUri  = "https://api.twitter.com/oauth/access_token"
-                          , oauthAuthorizeUri    = "https://api.twitter.com/oauth/authorize"
-                          , oauthSignatureMethod = HMACSHA1
-                          , oauthConsumerKey     = encodeUtf8 $ appTwitterOAuthKey $ appSettings master
-                          , oauthConsumerSecret  = encodeUtf8 $ appTwitterOAuthSecret $ appSettings master
-                          , oauthVersion         = OAuth10a
-                          }
-
 oauthTokenSecretName :: IsString a => a
 oauthTokenSecretName = "oauth_token_secret"
 
@@ -38,7 +27,7 @@ getAccountAuthForwardR = do
     setUltDestReferer
     master <- getYesod
     render <- getUrlRender
-    let oauth' = (mkOAuth master) { oauthCallback = Just $ encodeUtf8 $ render AccountAuthCallbackR }
+    let oauth' = (mkTwitterOAuth master) { oauthCallback = Just $ encodeUtf8 $ render AccountAuthCallbackR }
     tok <- getTemporaryCredential oauth' (authHttpManager master)
     setSession oauthSessionName $ bsToText $ fromMaybe "" $ lookup oauthTokenSecretName $ unCredential tok
     redirect $ authorizeUrl oauth' tok
@@ -47,7 +36,7 @@ getAccountAuthCallbackR :: Handler Html
 getAccountAuthCallbackR = do
     master <- getYesod
     uid <- requireAuthId
-    let oauth = mkOAuth master
+    let oauth = mkTwitterOAuth master
     Just tokSec <- lookupSession oauthSessionName
     deleteSession oauthSessionName
     denied <- runInputGet $ iopt textField "denied"

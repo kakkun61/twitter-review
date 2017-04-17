@@ -42,6 +42,9 @@
 <form method=post action=@{TweetR (Account.id account) (Tweet.id tweet)} enctype=#{commentFormEnctype}>
         ^{commentFormWidget}
         <button>Comment
+<form method=post action=@{TweetR (Account.id account) (Tweet.id tweet)} enctype=#{candidateFormEnctype}>
+        ^{candidateFormWidget}
+        <button>Candidate
 <form method=post action=@{TweetR (Account.id account) (Tweet.id tweet)} enctype=#{tweetFormEnctype}>
         ^{tweetFormWidget}
-        <button>New tweet text
+        <button>Tweet

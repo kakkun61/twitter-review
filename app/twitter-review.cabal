@@ -118,6 +118,7 @@ library
                  , HDBC-mysql
                  , relational-record-mysql
                  , convertible
+                 , twitter-conduit
 
 executable         twitter-review
     if flag(library-only)

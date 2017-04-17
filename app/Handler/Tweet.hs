@@ -5,8 +5,11 @@ module Handler.Tweet
 
 import Import hiding (on)
 import Data.Time.LocalTime
+import qualified Data.ByteString.Char8 as BS
 import Database.HDBC (commit)
 import Database.Relational.Query (on)
+import qualified Web.Authenticate.OAuth as OAuth
+import qualified Web.Twitter.Conduit as Twitter
 import qualified Model.Table.Account as Account
 import qualified Model.Table.Comment as Comment
 import qualified Model.Table.Tweet as Tweet
@@ -36,9 +39,9 @@ tweetR method accountIdParam tweetIdParam = runRelational $ do
             commentWE <- case method of
                              POST -> treatPostedCommentForm tweet user nowLt
                              _ -> lift $ generateFormPost commentForm
-            tweetWE <- case method of
-                           POST -> treatPostedTweetForm tweet user nowLt
-                           _ -> lift $ generateFormPost tweetForm
+            candidateWE <- case method of
+                               POST -> treatPostedCandidateForm tweet user nowLt
+                               _ -> lift $ generateFormPost candidateForm
             comments <- flip runQuery' () $ relationalQuery $ relation $ do
                             c <- query Comment.comment
                             u <- query User.user
@@ -54,11 +57,17 @@ tweetR method accountIdParam tweetIdParam = runRelational $ do
             let ccs = flip sortBy (mix comments candidates) $ \a b ->
                           let [aTime, bTime] = fmap (either (Comment.created . fst) (TweetCandidate.created . fst)) [a, b]
                           in compare aTime bTime
+            (tweetWE, tweet') <- case method of
+                           POST -> case lastMay candidates of
+                                       Just (candidate, _) -> treatPostedTweetForm account tweet candidate
+                                       Nothing -> lift $ (, tweet) <$> generateFormPost tweetForm
+                           _ -> lift $ (, tweet) <$> generateFormPost tweetForm
             $(logDebug) $ pack $ show ccs
             lift $ defaultLayout $ do
                 headerWidget $ Just user
-                tweetWidget account tweetUser tweet ccs tweetWE commentWE
+                tweetWidget account tweetUser tweet' ccs candidateWE commentWE tweetWE
         _ -> lift $ notFound
+
     where
         treatPostedCommentForm :: Tweet -> User -> LocalTime -> YesodRelationalMonad App (Widget, Enctype)
         treatPostedCommentForm tweet user now = do
@@ -73,29 +82,57 @@ tweetR method accountIdParam tweetIdParam = runRelational $ do
                 FormMissing -> do
                     return ()
             return (widget, enctype)
-        treatPostedTweetForm :: Tweet -> User -> LocalTime -> YesodRelationalMonad App (Widget, Enctype)
-        treatPostedTweetForm tweet user now = do
-            ((result, widget), enctype) <- lift $ runFormPost tweetForm
+
+        treatPostedCandidateForm :: Tweet -> User -> LocalTime -> YesodRelationalMonad App (Widget, Enctype)
+        treatPostedCandidateForm tweet user now = do
+            ((result, widget), enctype) <- lift $ runFormPost candidateForm
             case result of
-                FormSuccess tweetFormData -> do
-                    void $ runInsert TweetCandidate.insertTweetCandidateNoId (TweetCandidateNoId (Tweet.id tweet) (convert $ tweetFormText tweetFormData) (User.id user) now)
+                FormSuccess candidateFormData -> do
+                    void $ runInsert TweetCandidate.insertTweetCandidateNoId (TweetCandidateNoId (Tweet.id tweet) (convert $ candidateFormText candidateFormData) (User.id user) now)
                     run commit
                 FormFailure err -> do
                     $(logDebug) $ unlines err
                     return ()
                 FormMissing -> return ()
             return (widget, enctype)
+
+        treatPostedTweetForm :: Account -> Tweet -> TweetCandidate -> YesodRelationalMonad App ((Widget, Enctype), Tweet)
+        treatPostedTweetForm account tweet candidate = do
+            ((result, widget), enctype) <- lift $ runFormPost tweetForm
+            case result of
+                FormSuccess _ -> do
+                    master <- lift $ getYesod
+                    let httpManager = getHttpManager master
+                    let credential = OAuth.Credential [ ("oauth_token", BS.pack (Account.token account))
+                                                      , ("oauth_token_secret", BS.pack (Account.tokenSecret account))
+                                                      ]
+                    let token = def { Twitter.twOAuth = mkTwitterOAuth master
+                                    , Twitter.twCredential = credential
+                                    }
+                    let twInfo = def { Twitter.twToken = token }
+                    status <- Twitter.call twInfo httpManager $ Twitter.update $ pack $ TweetCandidate.text candidate
+                    $(logDebug) $ "status: " <> (pack $ show status)
+                    return ()
+                FormFailure err -> do
+                    $(logDebug) $ unlines err
+                    return ()
+                FormMissing -> return ()
+            return ((widget, enctype), tweet)
+
         mix :: (Functor f, Semigroup (f (Either a b))) => f a -> f b -> f (Either a b)
         mix l r = fmap Left l <> fmap Right r
 
-newtype TweetFormData = TweetFormData { tweetFormText :: Text }
+newtype CandidateFormData = CandidateFormData { candidateFormText :: Text }
     deriving Show
 
-tweetForm :: Html -> MForm Handler (FormResult TweetFormData, Widget)
-tweetForm = identifyForm "tweet" $ renderDivs $ TweetFormData <$> areq textField "Tweet" Nothing
+candidateForm :: Html -> MForm Handler (FormResult CandidateFormData, Widget)
+candidateForm = identifyForm "candidate" $ renderDivs $ CandidateFormData <$> areq textField "Candidate" Nothing
 
 newtype CommentFormData = CommentFormData { commentFormText :: Text }
     deriving Show
 
 commentForm :: Html -> MForm Handler (FormResult CommentFormData, Widget)
 commentForm = identifyForm "comment" $ renderDivs $ CommentFormData <$> areq textField "Comment" Nothing
+
+tweetForm :: Html -> MForm Handler (FormResult (), Widget)
+tweetForm = identifyForm "tweet" $ renderDivs $ pure ()

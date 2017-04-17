@@ -11,6 +11,7 @@ import qualified Data.CaseInsensitive as CI
 import qualified Data.Text.Encoding as TE
 import Database.HDBC        (commit)
 import Database.HDBC.MySQL  (Connection)
+import Web.Authenticate.OAuth (OAuth (..), OAuthVersion (OAuth10a), newOAuth, SignMethod (HMACSHA1))
 import qualified Model.Table.User as User
 
 -- | The foundation datatype for your application. This can be a good place to
@@ -213,6 +214,17 @@ instance YesodAuthRelational App where
         case us of
             [] -> return Nothing
             u : _ -> return $ Just u
+
+mkTwitterOAuth :: App -> OAuth
+mkTwitterOAuth master = newOAuth { oauthServerName      = "twitter"
+                                 , oauthRequestUri      = "https://api.twitter.com/oauth/request_token"
+                                 , oauthAccessTokenUri  = "https://api.twitter.com/oauth/access_token"
+                                 , oauthAuthorizeUri    = "https://api.twitter.com/oauth/authorize"
+                                 , oauthSignatureMethod = HMACSHA1
+                                 , oauthConsumerKey     = encodeUtf8 $ appTwitterOAuthKey $ appSettings master
+                                 , oauthConsumerSecret  = encodeUtf8 $ appTwitterOAuthSecret $ appSettings master
+                                 , oauthVersion         = OAuth10a
+                                 }
 
 -- This instance is required to use forms. You can modify renderMessage to
 -- achieve customized and internationalized form validation messages.
