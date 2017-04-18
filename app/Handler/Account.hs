@@ -15,7 +15,6 @@ getAccountR accountIdParam = do
         Nothing -> redirect (AccountR accountIdParam, [("status", toParam POpen)])
         Just statusParamText -> do
             let statusParams = fromMaybe S.empty $ fromParam statusParamText
-            $(logDebug) $ "state params: " <> pack (show (statusParams :: Set StatusParam))
             (account, rows) <- runRelational $ do
                 accounts <- flip runQuery () $ relationalQuery $ relation $ do
                                 a <- query Account.account

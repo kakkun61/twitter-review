@@ -91,7 +91,6 @@ instance Yesod App where
     isAuthorized HomeR        _ = return Authorized
     isAuthorized MasterLoginR _ = return Authorized
     isAuthorized r            _ = do
-        $(logDebug) $ "isAuthorized: " <> (pack $ show r)
         mUserId <- maybeAuthId
         case mUserId of
             Just _ -> do
@@ -145,8 +144,6 @@ instance YesodAuth App where
     redirectToReferer _ = True
 
     authenticate creds = runRelational $ do
-        $(logDebug) $ "creds id:" ++ (pack $ show $ credsIdent creds)
-        $(logDebug) $ "creds extra: " ++ (pack $ show $ credsExtra creds)
         let ident = unpack $ credsIdent creds
         mToken <- lift GoogleEmail2.getUserAccessToken
         case mToken of
@@ -163,18 +160,14 @@ instance YesodAuth App where
                         [User uid _ mDisplayName' token'] -> do
                             when (mDisplayName /= mDisplayName' || accTok /= token') $ do
                                 void $ runUpdate (updateUser uid mDisplayName accTok) ()
-                                $(logDebug) $ "updated"
                                 run commit
                             return $ Authenticated uid
                         [] -> do
                             _ <- runInsert User.insertUserNoId (UserNoId ident mDisplayName accTok)
-                            $(logDebug) $ "inserted"
                             run commit
-                            $(logDebug) $ "commited"
                             uids <- runQuery selectLastInsertId ()
                             case uids of
                                 [uid] -> do
-                                    $(logDebug) $ pack $ "last insert id: " ++ show uid
                                     return $ Authenticated uid
                                 _ -> return $ ServerError "unexpected"
                         _ -> return $ ServerError "unexpected"

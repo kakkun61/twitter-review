@@ -40,7 +40,7 @@ postNewTweetR accountIdParam = do
                     _ -> error "unexpected"
             redirect $ TweetR accountIdParam tweetId
         FormFailure err -> defaultLayout $ do
-            $(logDebug) $ unlines err
+            $(logWarn) $ unlines err
             headerWidget $ Just user
             $(widgetFile "new-tweet")
         FormMissing -> defaultLayout $ do

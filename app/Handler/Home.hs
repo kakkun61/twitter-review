@@ -9,7 +9,6 @@ import qualified Model.Table.UserAccountRelation as UAR
 getHomeR :: Handler Html
 getHomeR = do
     mUser <- maybeAuth
-    $(logDebug) $ pack $ show mUser
     case mUser of
         Just user -> do
             accounts <- runRelational $ flip runQuery () $ relationalQuery $ relation $ do
@@ -18,7 +17,6 @@ getHomeR = do
                 on $ a ! Account.id' .=. r ! UAR.accountId'
                 wheres $ r ! UAR.userId' .=. value (User.id user)
                 return a
-            $(logDebug) $ pack $ show accounts
             defaultLayout $ do
                 headerWidget mUser
                 homeWidget mUser accounts

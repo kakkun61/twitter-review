@@ -77,7 +77,7 @@ tweetR method accountIdParam tweetIdParam = runRelational $ do
                     void $ runInsert Comment.insertCommentNoId (CommentNoId (Tweet.id tweet) (convert $ commentFormText commentFormData) (User.id user) now)
                     run commit
                 FormFailure err -> do
-                    $(logDebug) $ unlines err
+                    $(logWarn) $ unlines err
                     return ()
                 FormMissing -> do
                     return ()
