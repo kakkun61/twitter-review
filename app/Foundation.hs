@@ -90,8 +90,7 @@ instance Yesod App where
     isAuthorized RobotsR      _ = return Authorized
     isAuthorized HomeR        _ = return Authorized
     isAuthorized MasterLoginR _ = return Authorized
-    isAuthorized r            _ = do
-        $(logDebug) $ "isAuthorized: " <> (pack $ show r)
+    isAuthorized _            _ = do
         mUserId <- maybeAuthId
         case mUserId of
             Just _ -> do

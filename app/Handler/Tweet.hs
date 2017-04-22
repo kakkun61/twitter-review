@@ -62,7 +62,6 @@ tweetR method accountIdParam tweetIdParam = runRelational $ do
                                        Just (candidate, _) -> treatPostedTweetForm account tweet candidate
                                        Nothing -> lift $ (, tweet) <$> generateFormPost tweetForm
                            _ -> lift $ (, tweet) <$> generateFormPost tweetForm
-            $(logDebug) $ pack $ show ccs
             lift $ defaultLayout $ do
                 headerWidget $ Just user
                 tweetWidget account tweetUser tweet' ccs candidateWE commentWE tweetWE
@@ -72,6 +71,7 @@ tweetR method accountIdParam tweetIdParam = runRelational $ do
         treatPostedCommentForm :: Tweet -> User -> LocalTime -> YesodRelationalMonad App (Widget, Enctype)
         treatPostedCommentForm tweet user now = do
             ((result, widget), enctype) <- lift $ runFormPost commentForm
+            logFormResult "comment" result
             case result of
                 FormSuccess commentFormData -> do
                     void $ runInsert Comment.insertCommentNoId (CommentNoId (Tweet.id tweet) (convert $ commentFormText commentFormData) (User.id user) now)
@@ -86,6 +86,7 @@ tweetR method accountIdParam tweetIdParam = runRelational $ do
         treatPostedCandidateForm :: Tweet -> User -> LocalTime -> YesodRelationalMonad App (Widget, Enctype)
         treatPostedCandidateForm tweet user now = do
             ((result, widget), enctype) <- lift $ runFormPost candidateForm
+            logFormResult "candidate" result
             case result of
                 FormSuccess candidateFormData -> do
                     void $ runInsert TweetCandidate.insertTweetCandidateNoId (TweetCandidateNoId (Tweet.id tweet) (convert $ candidateFormText candidateFormData) (User.id user) now)
@@ -99,24 +100,25 @@ tweetR method accountIdParam tweetIdParam = runRelational $ do
         treatPostedTweetForm :: Account -> Tweet -> TweetCandidate -> YesodRelationalMonad App ((Widget, Enctype), Tweet)
         treatPostedTweetForm account tweet candidate = do
             ((result, widget), enctype) <- lift $ runFormPost tweetForm
-            case result of
-                FormSuccess _ -> do
-                    master <- lift $ getYesod
-                    let httpManager = getHttpManager master
-                    let credential = OAuth.Credential [ ("oauth_token", BS.pack (Account.token account))
-                                                      , ("oauth_token_secret", BS.pack (Account.tokenSecret account))
-                                                      ]
-                    let token = def { Twitter.twOAuth = mkTwitterOAuth master
-                                    , Twitter.twCredential = credential
-                                    }
-                    let twInfo = def { Twitter.twToken = token }
-                    status <- Twitter.call twInfo httpManager $ Twitter.update $ pack $ TweetCandidate.text candidate
-                    $(logDebug) $ "status: " <> (pack $ show status)
-                    return ()
-                FormFailure err -> do
-                    $(logDebug) $ unlines err
-                    return ()
-                FormMissing -> return ()
+            logFormResult "tweet" result
+--             case result of
+--                 FormSuccess _ -> do
+--                     master <- lift $ getYesod
+--                     let httpManager = getHttpManager master
+--                     let credential = OAuth.Credential [ ("oauth_token", BS.pack (Account.token account))
+--                                                       , ("oauth_token_secret", BS.pack (Account.tokenSecret account))
+--                                                       ]
+--                     let token = def { Twitter.twOAuth = mkTwitterOAuth master
+--                                     , Twitter.twCredential = credential
+--                                     }
+--                     let twInfo = def { Twitter.twToken = token }
+--                     status <- Twitter.call twInfo httpManager $ Twitter.update $ pack $ TweetCandidate.text candidate
+--                     $(logDebug) $ "status: " <> (pack $ show status)
+--                     return ()
+--                 FormFailure err -> do
+--                     $(logDebug) $ unlines err
+--                     return ()
+--                 FormMissing -> return ()
             return ((widget, enctype), tweet)
 
         mix :: (Functor f, Semigroup (f (Either a b))) => f a -> f b -> f (Either a b)
@@ -136,3 +138,8 @@ commentForm = identifyForm "comment" $ renderDivs $ CommentFormData <$> areq tex
 
 tweetForm :: Html -> MForm Handler (FormResult (), Widget)
 tweetForm = identifyForm "tweet" $ renderDivs $ pure ()
+
+logFormResult tag result = $(logDebug) $ (tag <>) $ case result of
+                                                        FormSuccess _ -> " success"
+                                                        FormFailure _ -> " failure"
+                                                        FormMissing   -> " missing"
