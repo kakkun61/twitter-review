@@ -1,3 +1,9 @@
+if [[ "$_" == "$0" ]]
+then
+  echo Apply '"source"' to me. >&2
+  exit 1
+fi
+
 set -x
 
 cp -rf /ssh/* $HOME/.ssh
