@@ -6,6 +6,7 @@ fi
 
 set -x
 
+mkdir $HOME/.ssh
 cp -rf /ssh/* $HOME/.ssh
 chmod -R 600 $HOME/.ssh
 
@@ -29,10 +30,11 @@ appsync
 
 alias stack='stack --allow-different-user'
 
+apt update
 apt install -y make gcc libgmp3-dev libmysqlclient-dev pkgconf libpcre3-dev
 pushd /wd/app
-  stack setup --resolver=lts-5.4
-  stack install --resolver=lts-5.4 yesod-bin
+  stack setup --resolver=lts-8.12
+  stack install --resolver=lts-8.12 yesod-bin
   stack build --only-dependencies
 popd
 
