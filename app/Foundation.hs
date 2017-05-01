@@ -90,7 +90,7 @@ instance Yesod App where
     isAuthorized RobotsR      _ = return Authorized
     isAuthorized HomeR        _ = return Authorized
     isAuthorized MasterLoginR _ = return Authorized
-    isAuthorized r            _ = do
+    isAuthorized _            _ = do
         mUserId <- maybeAuthId
         case mUserId of
             Just _ -> do

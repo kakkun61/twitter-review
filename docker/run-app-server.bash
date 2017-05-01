@@ -7,4 +7,4 @@ docker run\
   -v "$(pwd):/app"\
   -v "$HOME/.ssh:/ssh"\
   -p 3000:3000\
-  fpco/stack-build:lts-5.4
+  fpco/stack-build:lts-8.12
