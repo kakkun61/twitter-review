@@ -4,6 +4,7 @@ module Handler.Tweet
  ) where
 
 import Import hiding (on)
+import qualified Import as F (on)
 import Data.Time.LocalTime
 import qualified Data.ByteString.Char8 as BS
 import Database.HDBC (commit)
@@ -48,7 +49,7 @@ tweetR method accountIdParam tweetIdParam = runRelational $ do
                             wheres $ c ! Comment.tweetId' .=. value (Tweet.id tweet)
                             on $ c ! Comment.userId' .=. u ! User.id'
                             return $ (,) |$| c |*| u
-            candidates <- flip runQuery' () $ relationalQuery $ relation $ do
+            candidates <- (sortBy (compare `F.on` (TweetCandidate.created . fst)) <$>) $ flip runQuery' () $ relationalQuery $ relation $ do
                               c <- query TweetCandidate.tweetCandidate
                               u <- query User.user
                               wheres $ c ! TweetCandidate.tweetId' .=. value (Tweet.id tweet)
@@ -57,6 +58,7 @@ tweetR method accountIdParam tweetIdParam = runRelational $ do
             let ccs = flip sortBy (mix comments candidates) $ \a b ->
                           let [aTime, bTime] = fmap (either (Comment.created . fst) (TweetCandidate.created . fst)) [a, b]
                           in compare aTime bTime
+            $(logDebug) $ "candidates: " <> (pack $ show candidates)
             (tweetWE, tweet') <- case method of
                            POST -> case lastMay candidates of
                                        Just (candidate, _) -> treatPostedTweetForm account tweet candidate
@@ -99,26 +101,27 @@ tweetR method accountIdParam tweetIdParam = runRelational $ do
 
         treatPostedTweetForm :: Account -> Tweet -> TweetCandidate -> YesodRelationalMonad App ((Widget, Enctype), Tweet)
         treatPostedTweetForm account tweet candidate = do
+            $(logDebug) $ "treatPostedTweetForm: " <> (pack $ show tweet) <> " " <> (pack $ show candidate)
             ((result, widget), enctype) <- lift $ runFormPost tweetForm
             logFormResult "tweet" result
---             case result of
---                 FormSuccess _ -> do
---                     master <- lift $ getYesod
---                     let httpManager = getHttpManager master
---                     let credential = OAuth.Credential [ ("oauth_token", BS.pack (Account.token account))
---                                                       , ("oauth_token_secret", BS.pack (Account.tokenSecret account))
---                                                       ]
---                     let token = def { Twitter.twOAuth = mkTwitterOAuth master
---                                     , Twitter.twCredential = credential
---                                     }
---                     let twInfo = def { Twitter.twToken = token }
---                     status <- Twitter.call twInfo httpManager $ Twitter.update $ pack $ TweetCandidate.text candidate
---                     $(logDebug) $ "status: " <> (pack $ show status)
---                     return ()
---                 FormFailure err -> do
---                     $(logDebug) $ unlines err
---                     return ()
---                 FormMissing -> return ()
+            case result of
+                FormSuccess _ -> do
+                    master <- lift $ getYesod
+                    let httpManager = getHttpManager master
+                    let credential = OAuth.Credential [ ("oauth_token", BS.pack (Account.token account))
+                                                      , ("oauth_token_secret", BS.pack (Account.tokenSecret account))
+                                                      ]
+                    let token = def { Twitter.twOAuth = mkTwitterOAuth master
+                                    , Twitter.twCredential = credential
+                                    }
+                    let twInfo = def { Twitter.twToken = token }
+                    status <- liftIO $ Twitter.call twInfo httpManager $ Twitter.update $ pack $ TweetCandidate.text candidate
+                    $(logDebug) $ "status: " <> (pack $ show status)
+                    return ()
+                FormFailure err -> do
+                    $(logDebug) $ unlines err
+                    return ()
+                FormMissing -> return ()
             return ((widget, enctype), tweet)
 
         mix :: (Functor f, Semigroup (f (Either a b))) => f a -> f b -> f (Either a b)
