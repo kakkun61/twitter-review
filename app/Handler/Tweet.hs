@@ -55,9 +55,7 @@ tweetR method accountIdParam tweetIdParam = runRelational $ do
                               wheres $ c ! TweetCandidate.tweetId' .=. value (Tweet.id tweet)
                               on $ c ! TweetCandidate.userId' .=. u ! User.id'
                               return $ (,) |$| c |*| u
-            let ccs = flip sortBy (mix comments candidates) $ \a b ->
-                          let [aTime, bTime] = fmap (either (Comment.created . fst) (TweetCandidate.created . fst)) [a, b]
-                          in compare aTime bTime
+            let ccs = sortBy (compare `F.on` either (Comment.created . fst) (TweetCandidate.created . fst)) (mix comments candidates)
             $(logDebug) $ "candidates: " <> (pack $ show candidates)
             (tweetWE, tweet') <- case method of
                            POST -> case lastMay candidates of
