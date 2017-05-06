@@ -56,7 +56,6 @@ tweetR method accountIdParam tweetIdParam = runRelational $ do
                               on $ c ! TweetCandidate.userId' .=. u ! User.id'
                               return $ (,) |$| c |*| u
             let ccs = sortBy (compare `F.on` either (Comment.created . fst) (TweetCandidate.created . fst)) (mix comments candidates)
-            $(logDebug) $ "candidates: " <> (pack $ show candidates)
             (tweetWE, tweet') <- case method of
                            POST -> case lastMay candidates of
                                        Just (candidate, _) -> treatPostedTweetForm account tweet candidate
@@ -71,7 +70,6 @@ tweetR method accountIdParam tweetIdParam = runRelational $ do
         treatPostedCommentForm :: Tweet -> User -> LocalTime -> YesodRelationalMonad App (Widget, Enctype)
         treatPostedCommentForm tweet user now = do
             ((result, widget), enctype) <- lift $ runFormPost commentForm
-            logFormResult "comment" result
             case result of
                 FormSuccess commentFormData -> do
                     void $ runInsert Comment.insertCommentNoId (CommentNoId (Tweet.id tweet) (convert $ commentFormText commentFormData) (User.id user) now)
@@ -86,7 +84,6 @@ tweetR method accountIdParam tweetIdParam = runRelational $ do
         treatPostedCandidateForm :: Tweet -> User -> LocalTime -> YesodRelationalMonad App (Widget, Enctype)
         treatPostedCandidateForm tweet user now = do
             ((result, widget), enctype) <- lift $ runFormPost candidateForm
-            logFormResult "candidate" result
             case result of
                 FormSuccess candidateFormData -> do
                     void $ runInsert TweetCandidate.insertTweetCandidateNoId (TweetCandidateNoId (Tweet.id tweet) (convert $ candidateFormText candidateFormData) (User.id user) now)
@@ -99,9 +96,7 @@ tweetR method accountIdParam tweetIdParam = runRelational $ do
 
         treatPostedTweetForm :: Account -> Tweet -> TweetCandidate -> YesodRelationalMonad App ((Widget, Enctype), Tweet)
         treatPostedTweetForm account tweet candidate = do
-            $(logDebug) $ "treatPostedTweetForm: " <> (pack $ show tweet) <> " " <> (pack $ show candidate)
             ((result, widget), enctype) <- lift $ runFormPost tweetForm
-            logFormResult "tweet" result
             case result of
                 FormSuccess _ -> do
                     master <- lift $ getYesod
@@ -139,8 +134,3 @@ commentForm = identifyForm "comment" $ renderDivs $ CommentFormData <$> areq tex
 
 tweetForm :: Html -> MForm Handler (FormResult (), Widget)
 tweetForm = identifyForm "tweet" $ renderDivs $ pure ()
-
-logFormResult tag result = $(logDebug) $ (tag <>) $ case result of
-                                                        FormSuccess _ -> " success"
-                                                        FormFailure _ -> " failure"
-                                                        FormMissing   -> " missing"
