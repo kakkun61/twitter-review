@@ -9,12 +9,15 @@ import Data.Time.LocalTime
 import qualified Data.ByteString.Char8 as BS
 import Database.HDBC (commit)
 import Database.Relational.Query (on)
+import Control.Lens
 import qualified Web.Authenticate.OAuth as OAuth
 import qualified Web.Twitter.Conduit as Twitter
+import qualified Web.Twitter.Types as Twitter
 import qualified Model.Table.Account as Account
 import qualified Model.Table.Comment as Comment
 import qualified Model.Table.Tweet as Tweet
 import qualified Model.Table.TweetCandidate as TweetCandidate
+import qualified Model.Table.TweetUri as TweetUri
 import qualified Model.Table.User as User
 
 getTweetR :: AccountIdParam -> TweetIdParam -> Handler Html
@@ -108,14 +111,27 @@ tweetR method accountIdParam tweetIdParam = runRelational $ do
                                     , Twitter.twCredential = credential
                                     }
                     let twInfo = def { Twitter.twToken = token }
-                    status <- liftIO $ Twitter.call twInfo httpManager $ Twitter.update $ pack $ TweetCandidate.text candidate
-                    $(logDebug) $ "status: " <> (pack $ show status)
-                    return ()
+                    do
+                        status <- liftIO $ Twitter.call twInfo httpManager $ Twitter.update (pack $ TweetCandidate.text candidate) -- & Twitter.trimUser ?~ True -- trimUser すると返ってくる JSON が型に合わない
+                        void $ runInsert TweetUri.insertTweetUri (TweetUri.TweetUri (Tweet.id tweet) ("https://twitter.com/" <> (Account.screenName account) <> "/status/" <> (show $ Twitter.statusId status)))
+                        void $ runUpdate (updateTweetStatus (Tweet.id tweet) (Tweeted "")) ()
+                        run commit
+                        return ()
+                    `catch`
+                    \(e :: SomeException) -> do
+                        setMessage "failed to tweet"
+                        $(logDebug) $ pack $ show e
                 FormFailure err -> do
                     $(logDebug) $ unlines err
                     return ()
                 FormMissing -> return ()
             return ((widget, enctype), tweet)
+            where
+                updateTweetStatus :: Int64 -> TweetStatus -> Update ()
+                updateTweetStatus tid status =
+                    typedUpdate Tweet.tableOfTweet . updateTarget $ \proj -> do
+                        Tweet.status' <-# value (convert status)
+                        wheres $ proj ! Tweet.id' .=. value tid
 
         mix :: (Functor f, Semigroup (f (Either a b))) => f a -> f b -> f (Either a b)
         mix l r = fmap Left l <> fmap Right r

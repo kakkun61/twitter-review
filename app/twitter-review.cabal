@@ -26,6 +26,7 @@ library
                      Model.Table.UserAccountRelation
                      Model.Table.Tweet
                      Model.Table.TweetCandidate
+                     Model.Table.TweetUri
                      Model.Parameter.Status
                      Settings
                      Settings.StaticFiles
@@ -64,6 +65,7 @@ library
                 TupleSections
                 RecordWildCards
                 DoAndIfThenElse
+                ScopedTypeVariables
 
     build-depends: base
                  , yesod
@@ -119,6 +121,8 @@ library
                  , relational-record-mysql
                  , convertible
                  , twitter-conduit
+                 , twitter-types
+                 , lens
 
 executable         twitter-review
     if flag(library-only)
