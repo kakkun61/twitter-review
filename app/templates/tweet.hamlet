@@ -39,12 +39,26 @@
                     <dd>#{fromMaybe "" $ User.displayName user} (#{User.email user})
                     <dt>created
                     <dd>#{show $ TweetCandidate.created candidate}
-<form method=post action=@{TweetR (Account.id account) (Tweet.id tweet)} enctype=#{commentFormEnctype}>
-        ^{commentFormWidget}
-        <button>Comment
-<form method=post action=@{TweetR (Account.id account) (Tweet.id tweet)} enctype=#{candidateFormEnctype}>
-        ^{candidateFormWidget}
-        <button>Candidate
-<form method=post action=@{TweetR (Account.id account) (Tweet.id tweet)} enctype=#{tweetFormEnctype}>
-        ^{tweetFormWidget}
-        <button>Tweet
+$case Tweet.status tweet
+    $of 0
+        <form method=post action=@{TweetR (Account.id account) (Tweet.id tweet)} enctype=#{commentFormEnctype}>
+                ^{commentFormWidget}
+                <button>Comment
+        <form method=post action=@{TweetR (Account.id account) (Tweet.id tweet)} enctype=#{candidateFormEnctype}>
+                ^{candidateFormWidget}
+                <button>Candidate
+        <form method=post action=@{TweetR (Account.id account) (Tweet.id tweet)} enctype=#{tweetFormEnctype}>
+                ^{tweetFormWidget}
+                <button>Tweet
+    $of 1
+        $maybe uri <- tweetUri
+            <p>
+                tweeted
+                <a href="#{uri}">
+                    uri
+        $nothing
+            <p>
+                tweeted, but no URI (something wrong)
+    $of 2
+        <p>
+            closed

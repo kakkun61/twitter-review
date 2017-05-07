@@ -64,9 +64,12 @@ tweetR method accountIdParam tweetIdParam = runRelational $ do
                                        Just (candidate, _) -> treatPostedTweetForm account tweet candidate
                                        Nothing -> lift $ (, tweet) <$> generateFormPost tweetForm
                            _ -> lift $ (, tweet) <$> generateFormPost tweetForm
+            tweetUri <- runQuery' TweetUri.selectTweetUri (Tweet.id tweet') >>= \case
+                            [uri] -> return $ Just $ pack $ TweetUri.uri uri
+                            _ -> return Nothing
             lift $ defaultLayout $ do
                 headerWidget $ Just user
-                tweetWidget account tweetUser tweet' ccs candidateWE commentWE tweetWE
+                tweetWidget account tweetUser tweet' tweetUri ccs candidateWE commentWE tweetWE
         _ -> lift $ notFound
 
     where

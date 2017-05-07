@@ -66,6 +66,7 @@ library
                 RecordWildCards
                 DoAndIfThenElse
                 ScopedTypeVariables
+                LambdaCase
 
     build-depends: base
                  , yesod
