@@ -37,6 +37,23 @@ accountWidget account rows statusParams = do
     let accountIdParam = Account.id account
     $(widgetFile "account")
 
-tweetWidget :: Account -> User -> Tweet -> Maybe Text -> [Either (Comment, User) (TweetCandidate, User)] -> (Widget, Enctype) -> (Widget, Enctype) -> (Widget, Enctype) -> Widget
-tweetWidget account tweetUser tweet tweetUri ccs (candidateFormWidget, candidateFormEnctype) (commentFormWidget, commentFormEnctype) (tweetFormWidget, tweetFormEnctype) = do
+tweetWidget :: Account
+            -> User
+            -> Tweet
+            -> Maybe Text
+            -> [Either (Comment, User) (TweetCandidate, User)]
+            -> (Widget, Enctype)
+            -> (Widget, Enctype)
+            -> (Widget, Enctype)
+            -> (Widget, Enctype)
+            -> Widget
+tweetWidget account
+            tweetUser
+            tweet
+            tweetUri
+            ccs
+            (candidateFormWidget, candidateFormEnctype)
+            (commentFormWidget, commentFormEnctype)
+            (tweetFormWidget, tweetFormEnctype)
+            (closeFormWidget, closeFormEnctype) = do
     $(widgetFile "tweet")

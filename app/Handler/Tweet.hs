@@ -46,30 +46,33 @@ tweetR method accountIdParam tweetIdParam = runRelational $ do
             candidateWE <- case method of
                                POST -> treatPostedCandidateForm tweet user nowLt
                                _ -> lift $ generateFormPost candidateForm
+            (closeWE, tweet') <- case method of
+                                     POST -> treatPostedCloseForm tweet
+                                     _ -> lift $ (, tweet) <$> generateFormPost closeForm
             comments <- flip runQuery' () $ relationalQuery $ relation $ do
                             c <- query Comment.comment
                             u <- query User.user
-                            wheres $ c ! Comment.tweetId' .=. value (Tweet.id tweet)
+                            wheres $ c ! Comment.tweetId' .=. value (Tweet.id tweet')
                             on $ c ! Comment.userId' .=. u ! User.id'
                             return $ (,) |$| c |*| u
             candidates <- (sortBy (compare `F.on` (TweetCandidate.created . fst)) <$>) $ flip runQuery' () $ relationalQuery $ relation $ do
                               c <- query TweetCandidate.tweetCandidate
                               u <- query User.user
-                              wheres $ c ! TweetCandidate.tweetId' .=. value (Tweet.id tweet)
+                              wheres $ c ! TweetCandidate.tweetId' .=. value (Tweet.id tweet')
                               on $ c ! TweetCandidate.userId' .=. u ! User.id'
                               return $ (,) |$| c |*| u
             let ccs = sortBy (compare `F.on` either (Comment.created . fst) (TweetCandidate.created . fst)) (mix comments candidates)
-            (tweetWE, tweet') <- case method of
+            (tweetWE, tweet'') <- case method of
                            POST -> case lastMay candidates of
-                                       Just (candidate, _) -> treatPostedTweetForm account tweet candidate
-                                       Nothing -> lift $ (, tweet) <$> generateFormPost tweetForm
-                           _ -> lift $ (, tweet) <$> generateFormPost tweetForm
-            tweetUri <- runQuery' TweetUri.selectTweetUri (Tweet.id tweet') >>= \case
+                                       Just (candidate, _) -> treatPostedTweetForm account tweet' candidate
+                                       Nothing -> lift $ (, tweet') <$> generateFormPost tweetForm
+                           _ -> lift $ (, tweet') <$> generateFormPost tweetForm
+            tweetUri <- runQuery' TweetUri.selectTweetUri (Tweet.id tweet'') >>= \case
                             [uri] -> return $ Just $ pack $ TweetUri.uri uri
                             _ -> return Nothing
             lift $ defaultLayout $ do
                 headerWidget $ Just user
-                tweetWidget account tweetUser tweet' tweetUri ccs candidateWE commentWE tweetWE
+                tweetWidget account tweetUser tweet'' tweetUri ccs candidateWE commentWE tweetWE closeWE
         _ -> lift $ notFound
 
     where
@@ -129,12 +132,27 @@ tweetR method accountIdParam tweetIdParam = runRelational $ do
                     return ()
                 FormMissing -> return ()
             return ((widget, enctype), tweet)
-            where
-                updateTweetStatus :: Int64 -> TweetStatus -> Update ()
-                updateTweetStatus tid status =
-                    typedUpdate Tweet.tableOfTweet . updateTarget $ \proj -> do
-                        Tweet.status' <-# value (convert status)
-                        wheres $ proj ! Tweet.id' .=. value tid
+
+        treatPostedCloseForm :: Tweet -> YesodRelationalMonad App ((Widget, Enctype), Tweet)
+        treatPostedCloseForm tweet = do
+            ((result, widget), enctype) <- lift $ runFormPost closeForm
+            tweet' <- case result of
+                          FormSuccess candidateFormData -> do
+                              void $ runUpdate (updateTweetStatus (Tweet.id tweet) (Closed)) ()
+                              run commit
+                              return $ tweet { Tweet.status = convert Closed }
+                          FormFailure err -> do
+                              $(logDebug) $ unlines err
+                              return tweet
+                          FormMissing -> return tweet
+            return ((widget, enctype), tweet')
+
+
+        updateTweetStatus :: Int64 -> TweetStatus -> Update ()
+        updateTweetStatus tid status =
+            typedUpdate Tweet.tableOfTweet . updateTarget $ \proj -> do
+                Tweet.status' <-# value (convert status)
+                wheres $ proj ! Tweet.id' .=. value tid
 
         mix :: (Functor f, Semigroup (f (Either a b))) => f a -> f b -> f (Either a b)
         mix l r = fmap Left l <> fmap Right r
@@ -153,3 +171,6 @@ commentForm = identifyForm "comment" $ renderDivs $ CommentFormData <$> areq tex
 
 tweetForm :: Html -> MForm Handler (FormResult (), Widget)
 tweetForm = identifyForm "tweet" $ renderDivs $ pure ()
+
+closeForm :: Html -> MForm Handler (FormResult (), Widget)
+closeForm = identifyForm "close" $ renderDivs $ pure ()
