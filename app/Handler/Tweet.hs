@@ -106,32 +106,33 @@ tweetR method accountIdParam tweetIdParam = runRelational $ do
         treatPostedTweetForm :: Account -> Tweet -> TweetCandidate -> YesodRelationalMonad App ((Widget, Enctype), Tweet)
         treatPostedTweetForm account tweet candidate = do
             ((result, widget), enctype) <- lift $ runFormPost tweetForm
-            case result of
-                FormSuccess _ -> do
-                    master <- lift $ getYesod
-                    let httpManager = getHttpManager master
-                    let credential = OAuth.Credential [ ("oauth_token", BS.pack (Account.token account))
-                                                      , ("oauth_token_secret", BS.pack (Account.tokenSecret account))
-                                                      ]
-                    let token = def { Twitter.twOAuth = mkTwitterOAuth master
-                                    , Twitter.twCredential = credential
-                                    }
-                    let twInfo = def { Twitter.twToken = token }
-                    do
-                        status <- liftIO $ Twitter.call twInfo httpManager $ Twitter.update (pack $ TweetCandidate.text candidate) -- & Twitter.trimUser ?~ True -- trimUser すると返ってくる JSON が型に合わない
-                        void $ runInsert TweetUri.insertTweetUri (TweetUri.TweetUri (Tweet.id tweet) ("https://twitter.com/" <> (Account.screenName account) <> "/status/" <> (show $ Twitter.statusId status)))
-                        void $ runUpdate (updateTweetStatus (Tweet.id tweet) (Tweeted "")) ()
-                        run commit
-                        return ()
-                    `catch`
-                    \(e :: SomeException) -> do
-                        setMessage "failed to tweet"
-                        $(logDebug) $ pack $ show e
-                FormFailure err -> do
-                    $(logDebug) $ unlines err
-                    return ()
-                FormMissing -> return ()
-            return ((widget, enctype), tweet)
+            tweet' <- case result of
+                          FormSuccess _ -> do
+                              master <- lift $ getYesod
+                              let httpManager = getHttpManager master
+                              let credential = OAuth.Credential [ ("oauth_token", BS.pack (Account.token account))
+                                                                , ("oauth_token_secret", BS.pack (Account.tokenSecret account))
+                                                                ]
+                              let token = def { Twitter.twOAuth = mkTwitterOAuth master
+                                              , Twitter.twCredential = credential
+                                              }
+                              let twInfo = def { Twitter.twToken = token }
+                              do
+                                  status <- liftIO $ Twitter.call twInfo httpManager $ Twitter.update (pack $ TweetCandidate.text candidate) -- & Twitter.trimUser ?~ True -- trimUser すると返ってくる JSON が型に合わない
+                                  void $ runInsert TweetUri.insertTweetUri (TweetUri.TweetUri (Tweet.id tweet) ("https://twitter.com/" <> (Account.screenName account) <> "/status/" <> (show $ Twitter.statusId status)))
+                                  void $ runUpdate (updateTweetStatus (Tweet.id tweet) (Tweeted "")) ()
+                                  run commit
+                                  return $ tweet { Tweet.status = convert PTweeted }
+                              `catch`
+                              \(e :: SomeException) -> do
+                                  setMessage "failed to tweet"
+                                  $(logDebug) $ pack $ show e
+                                  return tweet
+                          FormFailure err -> do
+                              $(logDebug) $ unlines err
+                              return tweet
+                          FormMissing -> return tweet
+            return ((widget, enctype), tweet')
 
         treatPostedCloseForm :: Tweet -> YesodRelationalMonad App ((Widget, Enctype), Tweet)
         treatPostedCloseForm tweet = do
