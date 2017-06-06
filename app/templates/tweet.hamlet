@@ -65,3 +65,6 @@ $case Tweet.status tweet
     $of 2
         <p>
             closed
+        <form method=post action=@{TweetR (Account.id account) (Tweet.id tweet)} enctype=#{reopenFormEnctype}>
+            ^{reopenFormWidget}
+            <button>Reopen

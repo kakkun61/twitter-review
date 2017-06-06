@@ -46,6 +46,7 @@ tweetWidget :: Account
             -> (Widget, Enctype)
             -> (Widget, Enctype)
             -> (Widget, Enctype)
+            -> (Widget, Enctype)
             -> Widget
 tweetWidget account
             tweetUser
@@ -55,5 +56,6 @@ tweetWidget account
             (candidateFormWidget, candidateFormEnctype)
             (commentFormWidget, commentFormEnctype)
             (tweetFormWidget, tweetFormEnctype)
-            (closeFormWidget, closeFormEnctype) = do
+            (closeFormWidget, closeFormEnctype)
+            (reopenFormWidget, reopenFormEnctype) = do
     $(widgetFile "tweet")
