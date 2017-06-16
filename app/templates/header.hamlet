@@ -1,3 +1,21 @@
+<nav .navbar .navbar-default>
+    <.container-fluid>
+        <.navbar-header>
+            <a .navbar-brand href=/ >
+                Review for Twitter
+        <.collapse .navbar-collapse>
+            <ul .nav .navbar-nav .navbar-right>
+                $maybe user <- mUser
+                    <li .dropdown>
+                        <a href=# .dropdown-toggle data-toggle=dropdown role=button area-haspopup=true aria-expanded=false>
+                            #{fromMaybe "" $ User.displayName user} (#{User.email user})
+                            <span .caret>
+                        <ul .dropdown-menu>
+                            <li>
+                                <a href=#>
+                                    Logout
+
+
 <header>
   <p><a href=@{HomeR}>Home</a>
 $maybe user <- mUser
