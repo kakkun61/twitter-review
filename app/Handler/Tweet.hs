@@ -86,6 +86,7 @@ tweetR method accountIdParam tweetIdParam = runRelational $ do
                 FormSuccess commentFormData -> do
                     void $ runInsert Comment.insertCommentNoId (CommentNoId (Tweet.id tweet) (convert $ commentFormText commentFormData) (User.id user) now)
                     run commit
+                    lift $ postSlack $ (convert $ User.email user) <> ": " <> (commentFormText commentFormData)
                 FormFailure err -> do
                     $(logWarn) $ unlines err
                     return ()

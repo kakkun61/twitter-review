@@ -39,3 +39,5 @@ googleOAuthSecret: "_env:GOOGLE_OAUTH_CLIENT_SECRET:"
 
 twitterOAuthKey: "_env:TWITTER_OAUTH_CLIENT:"
 twitterOAuthSecret: "_env:TWITTER_OAUTH_CLIENT_SECRET:"
+
+slackIncomingWebhook: "_env:SLACK_INCOMING_WEBHOOK:"

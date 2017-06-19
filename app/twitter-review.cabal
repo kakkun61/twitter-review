@@ -32,6 +32,7 @@ library
                      Settings.StaticFiles
                      Template
                      DataSource
+                     Slack
                      Handler.Common
                      Handler.Tweet
                      Handler.Home
@@ -124,6 +125,7 @@ library
                  , twitter-conduit
                  , twitter-types
                  , lens
+                 , wreq
 
 executable         twitter-review
     if flag(library-only)

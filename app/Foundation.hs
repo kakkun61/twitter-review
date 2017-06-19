@@ -13,6 +13,7 @@ import Database.HDBC        (commit)
 import Database.HDBC.MySQL  (Connection)
 import Web.Authenticate.OAuth (OAuth (..), OAuthVersion (OAuth10a), newOAuth, SignMethod (HMACSHA1))
 import qualified Model.Table.User as User
+import qualified Slack
 
 -- | The foundation datatype for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -231,6 +232,12 @@ instance RenderMessage App FormMessage where
 -- This can also be useful for writing code that works across multiple Yesod applications.
 instance HasHttpManager App where
     getHttpManager = appHttpManager
+
+postSlack :: Text -> Handler ()
+postSlack message = do
+    master <- getYesod
+    let uri = appSlackIncomingWebhook $ appSettings master
+    liftIO $ Slack.post uri (unpack message)
 
 unsafeHandler :: App -> Handler a -> IO a
 unsafeHandler = Unsafe.fakeHandlerGetLogger appLogger

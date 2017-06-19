@@ -57,6 +57,8 @@ data AppSettings = AppSettings
 
     , appTwitterOAuthKey        :: Text
     , appTwitterOAuthSecret     :: Text
+
+    , appSlackIncomingWebhook   :: String
     }
 
 instance FromJSON AppSettings where
@@ -87,6 +89,8 @@ instance FromJSON AppSettings where
 
         appTwitterOAuthKey <- o .: "twitterOAuthKey"
         appTwitterOAuthSecret <- o .: "twitterOAuthSecret"
+
+        appSlackIncomingWebhook <- o .: "slackIncomingWebhook"
 
         return AppSettings {..}
 
