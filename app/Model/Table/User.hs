@@ -9,8 +9,8 @@ import DataSource (defineTable)
 
 $(defineTable "user")
 
-data UserNoId = UserNoId { userNoIdEmail :: String, userNoIdDisplayName :: Maybe String, userNoIdToken :: String }
+data UserNoId = UserNoId { userNoIdEmail :: String, userNoIdEmailUser :: String, userNoIdDisplayName :: Maybe String, userNoIdToken :: String }
 $(makeRecordPersistableDefault ''UserNoId)
 
 insertUserNoId :: Insert UserNoId
-insertUserNoId = typedInsert tableOfUser (UserNoId |$| email' |*| displayName' |*| token')
+insertUserNoId = typedInsert tableOfUser (UserNoId |$| email' |*| emailUser' |*| displayName' |*| token')

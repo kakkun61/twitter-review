@@ -19,6 +19,7 @@ import qualified Model.Table.Tweet as Tweet
 import qualified Model.Table.TweetCandidate as TweetCandidate
 import qualified Model.Table.TweetUri as TweetUri
 import qualified Model.Table.User as User
+import qualified Slack
 
 getTweetR :: AccountIdParam -> TweetIdParam -> Handler Html
 getTweetR = tweetR GET
@@ -46,36 +47,36 @@ tweetR method accountIdParam tweetIdParam = runRelational $ do
             candidateWE <- case method of
                                POST -> treatPostedCandidateForm tweet user nowLt
                                _ -> lift $ generateFormPost candidateForm
-            (closeWE, tweet') <- case method of
+            (closeWE, tweet) <- case method of
                                      POST -> treatPostedCloseForm tweet
                                      _ -> lift $ (, tweet) <$> generateFormPost closeForm
-            (reopenWE, tweet'') <- case method of
-                                       POST -> treatPostedReopenForm tweet'
-                                       _ -> lift $ (, tweet') <$> generateFormPost reopenForm
+            (reopenWE, tweet) <- case method of
+                                       POST -> treatPostedReopenForm tweet
+                                       _ -> lift $ (, tweet) <$> generateFormPost reopenForm
             comments <- flip runQuery' () $ relationalQuery $ relation $ do
                             c <- query Comment.comment
                             u <- query User.user
-                            wheres $ c ! Comment.tweetId' .=. value (Tweet.id tweet'')
+                            wheres $ c ! Comment.tweetId' .=. value (Tweet.id tweet)
                             on $ c ! Comment.userId' .=. u ! User.id'
                             return $ (,) |$| c |*| u
             candidates <- (sortBy (compare `F.on` (TweetCandidate.created . fst)) <$>) $ flip runQuery' () $ relationalQuery $ relation $ do
                               c <- query TweetCandidate.tweetCandidate
                               u <- query User.user
-                              wheres $ c ! TweetCandidate.tweetId' .=. value (Tweet.id tweet'')
+                              wheres $ c ! TweetCandidate.tweetId' .=. value (Tweet.id tweet)
                               on $ c ! TweetCandidate.userId' .=. u ! User.id'
                               return $ (,) |$| c |*| u
             let ccs = sortBy (compare `F.on` either (Comment.created . fst) (TweetCandidate.created . fst)) (mix comments candidates)
-            (tweetWE, tweet'') <- case method of
+            (tweetWE, tweet) <- case method of
                            POST -> case lastMay candidates of
-                                       Just (candidate, _) -> treatPostedTweetForm account tweet'' candidate
-                                       Nothing -> lift $ (, tweet'') <$> generateFormPost tweetForm
-                           _ -> lift $ (, tweet'') <$> generateFormPost tweetForm
-            tweetUri <- runQuery' TweetUri.selectTweetUri (Tweet.id tweet'') >>= \case
+                                       Just (candidate, _) -> treatPostedTweetForm account tweet user candidate
+                                       Nothing -> lift $ (, tweet) <$> generateFormPost tweetForm
+                           _ -> lift $ (, tweet) <$> generateFormPost tweetForm
+            tweetUri <- runQuery' TweetUri.selectTweetUri (Tweet.id tweet) >>= \case
                             [uri] -> return $ Just $ pack $ TweetUri.uri uri
                             _ -> return Nothing
             lift $ defaultLayout $ do
                 headerWidget $ Just user
-                tweetWidget account tweetUser tweet'' tweetUri ccs candidateWE commentWE tweetWE closeWE reopenWE
+                tweetWidget account tweetUser tweet tweetUri ccs candidateWE commentWE tweetWE closeWE reopenWE
         _ -> lift $ notFound
 
     where
@@ -86,7 +87,7 @@ tweetR method accountIdParam tweetIdParam = runRelational $ do
                 FormSuccess commentFormData -> do
                     void $ runInsert Comment.insertCommentNoId (CommentNoId (Tweet.id tweet) (convert $ commentFormText commentFormData) (User.id user) now)
                     run commit
-                    lift $ postSlack $ (convert $ User.email user) <> ": " <> (commentFormText commentFormData)
+                    lift $ postSlack $ Slack.commented user tweet (commentFormText commentFormData)
                 FormFailure err -> do
                     $(logWarn) $ unlines err
                     return ()
@@ -101,16 +102,17 @@ tweetR method accountIdParam tweetIdParam = runRelational $ do
                 FormSuccess candidateFormData -> do
                     void $ runInsert TweetCandidate.insertTweetCandidateNoId (TweetCandidateNoId (Tweet.id tweet) (convert $ candidateFormText candidateFormData) (User.id user) now)
                     run commit
+                    lift $ postSlack $ Slack.candidatePosted user tweet (candidateFormText candidateFormData)
                 FormFailure err -> do
                     $(logDebug) $ unlines err
                     return ()
                 FormMissing -> return ()
             return (widget, enctype)
 
-        treatPostedTweetForm :: Account -> Tweet -> TweetCandidate -> YesodRelationalMonad App ((Widget, Enctype), Tweet)
-        treatPostedTweetForm account tweet candidate = do
+        treatPostedTweetForm :: Account -> Tweet -> User -> TweetCandidate -> YesodRelationalMonad App ((Widget, Enctype), Tweet)
+        treatPostedTweetForm account tweet user candidate = do
             ((result, widget), enctype) <- lift $ runFormPost tweetForm
-            tweet' <- case result of
+            tweet <- case result of
                           FormSuccess _ -> do
                               master <- lift $ getYesod
                               let httpManager = getHttpManager master
@@ -123,9 +125,11 @@ tweetR method accountIdParam tweetIdParam = runRelational $ do
                               let twInfo = def { Twitter.twToken = token }
                               do
                                   status <- liftIO $ Twitter.call twInfo httpManager $ Twitter.update (pack $ TweetCandidate.text candidate) -- & Twitter.trimUser ?~ True -- trimUser すると返ってくる JSON が型に合わない
-                                  void $ runInsert TweetUri.insertTweetUri (TweetUri.TweetUri (Tweet.id tweet) ("https://twitter.com/" <> (Account.screenName account) <> "/status/" <> (show $ Twitter.statusId status)))
+                                  let statusUri = "https://twitter.com/" <> (Account.screenName account) <> "/status/" <> (show $ Twitter.statusId status)
+                                  void $ runInsert TweetUri.insertTweetUri (TweetUri.TweetUri (Tweet.id tweet) statusUri)
                                   void $ runUpdate (updateTweetStatus (Tweet.id tweet) (Tweeted "")) ()
                                   run commit
+                                  lift $ postSlack $ Slack.tweeted user tweet statusUri
                                   return $ tweet { Tweet.status = convert PTweeted }
                               `catch`
                               \(e :: SomeException) -> do
@@ -136,12 +140,12 @@ tweetR method accountIdParam tweetIdParam = runRelational $ do
                               $(logDebug) $ unlines err
                               return tweet
                           FormMissing -> return tweet
-            return ((widget, enctype), tweet')
+            return ((widget, enctype), tweet)
 
         treatPostedCloseForm :: Tweet -> YesodRelationalMonad App ((Widget, Enctype), Tweet)
         treatPostedCloseForm tweet = do
             ((result, widget), enctype) <- lift $ runFormPost closeForm
-            tweet' <- case result of
+            tweet <- case result of
                           FormSuccess candidateFormData -> do
                               void $ runUpdate (updateTweetStatus (Tweet.id tweet) Closed) ()
                               run commit
@@ -150,12 +154,12 @@ tweetR method accountIdParam tweetIdParam = runRelational $ do
                               $(logDebug) $ unlines err
                               return tweet
                           FormMissing -> return tweet
-            return ((widget, enctype), tweet')
+            return ((widget, enctype), tweet)
 
         treatPostedReopenForm :: Tweet -> YesodRelationalMonad App ((Widget, Enctype), Tweet)
         treatPostedReopenForm tweet = do
             ((result, widget), enctype) <- lift $ runFormPost reopenForm
-            tweet' <- case result of
+            tweet <- case result of
                           FormSuccess candidateFormData -> do
                               void $ runUpdate (updateTweetStatus (Tweet.id tweet) Open) ()
                               run commit
@@ -164,7 +168,7 @@ tweetR method accountIdParam tweetIdParam = runRelational $ do
                               $(logDebug) $ unlines err
                               return tweet
                           FormMissing -> return tweet
-            return ((widget, enctype), tweet')
+            return ((widget, enctype), tweet)
 
         updateTweetStatus :: Int64 -> TweetStatus -> Update ()
         updateTweetStatus tid status =

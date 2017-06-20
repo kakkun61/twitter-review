@@ -14,6 +14,7 @@ import Database.HDBC.MySQL  (Connection)
 import Web.Authenticate.OAuth (OAuth (..), OAuthVersion (OAuth10a), newOAuth, SignMethod (HMACSHA1))
 import qualified Model.Table.User as User
 import qualified Slack
+import qualified Data.Aeson.Types as Aeson
 
 -- | The foundation datatype for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -160,13 +161,13 @@ instance YesodAuth App where
                     mDisplayName <- fmap (fmap unpack . join . fmap (GoogleEmail2.personDisplayName)) $ lift (GoogleEmail2.getPerson manager token)
                     mUser <- runQuery (relationalQuery (userFromEmail ident)) ()
                     case mUser of
-                        [User uid _ mDisplayName' token'] -> do
+                        [User uid _ _ mDisplayName' token'] -> do
                             when (mDisplayName /= mDisplayName' || accTok /= token') $ do
                                 void $ runUpdate (updateUser uid mDisplayName accTok) ()
                                 run commit
                             return $ Authenticated uid
                         [] -> do
-                            _ <- runInsert User.insertUserNoId (UserNoId ident mDisplayName accTok)
+                            _ <- runInsert User.insertUserNoId (UserNoId ident (takeWhile (/= '@') ident) mDisplayName accTok)
                             run commit
                             uids <- runQuery selectLastInsertId ()
                             case uids of
@@ -233,11 +234,11 @@ instance RenderMessage App FormMessage where
 instance HasHttpManager App where
     getHttpManager = appHttpManager
 
-postSlack :: Text -> Handler ()
-postSlack message = do
+postSlack :: Aeson.Value -> Handler ()
+postSlack body = do
     master <- getYesod
     let uri = appSlackIncomingWebhook $ appSettings master
-    liftIO $ Slack.post uri (unpack message)
+    liftIO $ Slack.post uri body
 
 unsafeHandler :: App -> Handler a -> IO a
 unsafeHandler = Unsafe.fakeHandlerGetLogger appLogger

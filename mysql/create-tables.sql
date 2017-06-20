@@ -6,6 +6,7 @@ use `twitter-review`;
 CREATE TABLE `user` (
   `id`           BIGINT UNSIGNED                   NOT NULL AUTO_INCREMENT,
   `email`        VARCHAR(254) CHARACTER SET latin1 NOT NULL,
+  `email_user`   VARCHAR(254) CHARACTER SET latin1 NOT NULL,
   `display_name` TEXT,
   `token`        TEXT                              NOT NULL,
   PRIMARY KEY (`id`),
