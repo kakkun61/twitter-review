@@ -10,9 +10,11 @@ import qualified Data.ByteString.Char8 as BS
 import Database.HDBC (commit)
 import Database.Relational.Query (on)
 import Control.Lens
+import qualified Control.Exception.Safe as Exception
 import qualified Web.Authenticate.OAuth as OAuth
 import qualified Web.Twitter.Conduit as Twitter
 import qualified Web.Twitter.Types as Twitter
+import qualified Network.HTTP.Types.Status as HTTP
 import qualified Model.Table.Account as Account
 import qualified Model.Table.Comment as Comment
 import qualified Model.Table.Tweet as Tweet
@@ -131,11 +133,26 @@ tweetR method accountIdParam tweetIdParam = runRelational $ do
                                   run commit
                                   lift $ postSlack $ Slack.tweeted user tweet statusUri
                                   return $ tweet { Tweet.status = convert PTweeted }
-                              `catch`
-                              \(e :: SomeException) -> do
-                                  setMessage "failed to tweet"
+                              `catches`
+                              [ Exception.Handler (\(e :: Twitter.TwitterError) -> do
                                   $(logDebug) $ pack $ show e
-                                  return tweet
+                                  case e of
+                                      Twitter.FromJSONError _ -> errorLog e
+                                      Twitter.TwitterErrorResponse (HTTP.Status 401 "Authorization Required") _ [(Twitter.TwitterErrorMessage 32 _)] -> do
+                                          lift $ setMessage "Re-authorize this application because the access token has been invalidated."
+                                          lift $ setUltDestCurrent
+                                          lift $ redirect NewAccountR
+                                      Twitter.TwitterErrorResponse _ _ _ -> errorLog e
+                                      Twitter.TwitterUnknownErrorResponse _ _ _ -> errorLog e
+                                      Twitter.TwitterStatusError _ _ _ -> errorLog e)
+                              , Exception.Handler (\(e :: SomeException) -> errorLog e)
+                              ]
+                              where
+                                  errorLog :: (Exception e) => e -> YesodRelationalMonad App Tweet
+                                  errorLog e = do
+                                      setMessage "failed to tweet"
+                                      $(logDebug) $ pack $ show e
+                                      return tweet
                           FormFailure err -> do
                               $(logDebug) $ unlines err
                               return tweet

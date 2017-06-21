@@ -24,7 +24,6 @@ oauthSessionName = "__oauth_token_secret"
 
 getAccountAuthForwardR :: Handler Html
 getAccountAuthForwardR = do
-    setUltDestReferer
     master <- getYesod
     render <- getUrlRender
     let oauth' = (mkTwitterOAuth master) { oauthCallback = Just $ encodeUtf8 $ render AccountAuthCallbackR }
@@ -66,8 +65,7 @@ getAccountAuthCallbackR = do
                 userId     = read $ unpack $ fromJust $ lookup "user_id" dic
                 screenName = unpack $ fromJust $ lookup "screen_name" dic
             runRelational $ store uid userId screenName tok $ unpack tokSec
-            clearUltDest
-            redirect $ AccountSettingR userId
+            redirectUltDest $ AccountSettingR userId
     where
         store :: (IConnection (YesodRelationalConnection site)) => AuthId App -> Int64 -> String -> String -> String -> YesodRelationalMonad site ()
         store uid userId screenName token tokenSecret = do

@@ -126,6 +126,8 @@ library
                  , twitter-types
                  , lens
                  , wreq
+                 , safe-exceptions
+                 , http-types
 
 executable         twitter-review
     if flag(library-only)
