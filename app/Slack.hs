@@ -61,13 +61,13 @@ tweeted :: User -> Tweet -> String -> Aeson.Value
 tweeted user tweet uri =
     let
         author = User.emailUser user
-        id = Tweet.id tweet
+        tid = Tweet.id tweet
     in
         Aeson.object
             [ "attachments" .= Vector.singleton (Aeson.object
                   [ "pretext" .= ("<@" <> author <> "> has tweeted")
                   , "author_name" .= author
-                  , "title" .= ("ID: " <> (show id))
+                  , "title" .= ("ID: " <> (show tid))
                   , "text" .= uri
                   ]
               )
