@@ -62,9 +62,10 @@ getAccountAuthCallbackR = do
             Credential bsDic <- getAccessToken oauth reqTok $ getHttpManager master
             let dic        = map (bsToText *** bsToText) bsDic
                 tok        = unpack $ fromJust $ lookup oauthTokenName dic
+                tokSec'    = unpack $ fromJust $ lookup oauthTokenSecretName dic
                 userId     = read $ unpack $ fromJust $ lookup "user_id" dic
                 screenName = unpack $ fromJust $ lookup "screen_name" dic
-            runRelational $ store uid userId screenName tok $ unpack tokSec
+            runRelational $ store uid userId screenName tok $ unpack tokSec'
             redirectUltDest $ AccountSettingR userId
     where
         store :: (IConnection (YesodRelationalConnection site)) => AuthId App -> Int64 -> String -> String -> String -> YesodRelationalMonad site ()
